@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<!--
+  PT-Planer v1.0.0 (2026-11-25) – Projekt- & Ressourcenplanung in Personentagen
+  https://github.com/NoAuthZone/PT-Planer · MIT-Lizenz
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PT-Planer – Projekt- & Ressourcenplanung</title>
+<meta name="generator" content="PT-Planer 1.0.0">
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--text:#1c2230;--muted:#667085;--line:#e2e5eb;--accent:#2f6fde;--accent2:#e8f0fd;--ok:#1f9d55;--warn:#d98a00;--bad:#d64545;
+--we:#eceef2;--hol:#fcdcae;--abs-urlaub:#cfe0ff;--abs-krank:#f9cccc;--abs-schulung:#e4d8fb;--abs-gleitzeit:#d3f0e2;--abs-sonstiges:#e6e6e6}
+:root[data-theme=dark]{--bg:#11141a;--panel:#1a1f28;--text:#e6e9ef;--muted:#98a2b3;--line:#2b3241;--accent:#6094f2;--accent2:#1f2c45;
+--we:#232934;--hol:#5a4421;--abs-urlaub:#24396a;--abs-krank:#5a2a2a;--abs-schulung:#3d2f63;--abs-gleitzeit:#1f4a39;--abs-sonstiges:#3a3a3a}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+body{font-size:14px}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:14px 10px;overflow-y:auto}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 16px}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.brand b{display:block;font-size:15px}.brand small{color:var(--muted);font-size:11px}
+#nav{display:flex;flex-direction:column;gap:1px}
+#nav .ng{font-size:11px;color:var(--muted);font-weight:600;padding:12px 10px 4px}
+#nav button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:8px 10px;border-radius:8px;color:var(--text);cursor:pointer;font:inherit;text-align:left;width:100%}
+#nav button i{font-style:normal;width:18px;text-align:center;opacity:.8}
+#nav button:hover{background:var(--bg)}
+#nav button.on{background:var(--accent2);color:var(--accent);font-weight:600}
+#nav button .bd{margin-left:auto;font-size:11px;border-radius:9px;padding:0 7px;background:var(--we);color:var(--muted);font-weight:600}
+#nav button .bd.bad{background:#fbdcdc;color:#a32424}#nav button .bd.warn{background:#fdefd2;color:#8a5a00}
+.sfoot{margin-top:auto;padding:12px 8px 0}
+.ver{font-size:11px;color:var(--muted);margin-top:8px}.ver a{color:var(--muted)}.ver a:hover{color:var(--accent)}
+.mainwrap{min-width:0}
+header.top{display:flex;align-items:center;gap:10px;padding:10px 22px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+header.top .sp{flex:1}
+header.top select{padding:5px 8px}
+.btn.search{color:var(--muted);min-width:230px;text-align:left;display:flex;align-items:center;gap:8px}.btn.search .kbd{margin-left:auto}
+main{padding:22px 26px 40px;max-width:1600px}
+.phead{display:flex;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.phead h1{font-size:24px;margin:0;line-height:1.15}
+.phead p{margin:4px 0 0;color:var(--muted)}
+.phead .pact{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.card td a,.trow a{color:inherit;text-decoration:none}.card td a:hover{text-decoration:underline;color:var(--accent)}
+.card{border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+table tr:hover td{background-color:color-mix(in srgb,var(--accent2) 35%,transparent)}
+.cal table tr:hover td,.fcal tr:hover td,.pg tr:hover td{background-color:inherit}
+.dk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.dk .kpi{padding:14px 16px;cursor:default}.dk .kpi b{font-size:28px;margin:2px 0}.dk .kpi .bar{margin:8px 0 4px}
+.dk .kpi.click{cursor:pointer}.dk .kpi.click:hover{border-color:var(--accent)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.alerts{padding:0}.alerts summary{padding:12px 16px;cursor:pointer;font-weight:600;list-style:none;display:flex;gap:10px;align-items:center}
+.alerts summary::-webkit-details-marker{display:none}.alerts[open] summary{border-bottom:1px solid var(--line)}
+.alerts ul{padding:4px 16px 8px}
+.alerts.has-bad{border-color:#f0b4b4}
+.trow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.trow:hover{background:var(--bg)}.trow:last-child{border-bottom:0}
+.trow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trow .nm small{display:block;color:var(--muted);font-size:11px}
+.trow .num{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.step{border:1px solid var(--line);border-radius:10px;padding:14px}.step b{display:block;margin-bottom:4px}.step.done{opacity:.6}.step.done>b::before{content:"✓ ";color:var(--ok)}
+.demobar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 14px;margin:-6px 0 16px;border-radius:10px;background:#fdefd2;color:#5c3c00;border:1px solid #f0d08a}
+.demobar .sp{flex:1}:root[data-theme=dark] .demobar{background:#46370f;color:#f3d9a0;border-color:#6b5520}
+.pal{margin-top:10px;max-height:52vh;overflow:auto}
+.pi{padding:8px 10px;border-radius:7px;cursor:pointer;display:flex;gap:8px;align-items:center}.pi span{margin-left:auto;font-size:11px;color:var(--muted)}
+.pi.on,.pi:hover{background:var(--accent2)}
+@media (max-width:1100px){.dk{grid-template-columns:repeat(2,minmax(0,1fr))}.dgrid{grid-template-columns:minmax(0,1fr)}.btn.search{min-width:0}.btn.search .kbd{display:none}}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}.side{position:static;height:auto;padding:8px}.brand{padding:4px 6px 6px}#nav{flex-direction:row;overflow-x:auto}#nav .ng{display:none}#nav button{width:auto;white-space:nowrap}.sfoot{display:none}main{padding:16px}}
+@media print{.side,header.top{display:none!important}.app{display:block}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;overflow-x:auto}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .sp{flex:1}
+.muted{color:var(--muted)} .small{font-size:12px}
+.row{display:flex;gap:16px;flex-wrap:wrap}.row>.card{flex:1;min-width:340px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi span{color:var(--muted);font-size:12px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sum td{font-weight:600;border-top:2px solid var(--line)}
+.btn{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 11px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:2px 8px;font-size:12px}
+.btn.ghost{border-color:transparent;background:none}
+select,input,textarea{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text)}
+input[type=color]{padding:2px;height:34px;width:60px}
+.bar{height:8px;background:var(--we);border-radius:4px;overflow:hidden;min-width:90px;position:relative}
+.bar i{display:block;height:100%;border-radius:4px}
+.bar em{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--text);opacity:.5}
+.dot{width:11px;height:11px;border-radius:3px;display:inline-block;vertical-align:-1px;margin-right:6px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;background:var(--we);color:var(--muted);white-space:nowrap}
+.tag.ok{background:#d9f2e3;color:#13703c}.tag.warn{background:#fdefd2;color:#8a5a00}.tag.bad{background:#fbdcdc;color:#a32424}.tag.info{background:var(--accent2);color:var(--accent)}
+:root[data-theme=dark] .tag.ok{background:#173d29;color:#7fd8a5}:root[data-theme=dark] .tag.warn{background:#46370f;color:#f3c66b}:root[data-theme=dark] .tag.bad{background:#4a1d1d;color:#f29a9a}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar .sp{flex:1}
+.toolbar select{max-width:200px}
+.pnav{display:inline-flex;gap:4px;align-items:center}
+.pg td.pw{min-width:50px;text-align:center;font-size:11px;padding:4px 3px;font-variant-numeric:tabular-nums;line-height:1.25}
+.pg td.pw b{display:block;font-size:12px}
+.pg th.pw{text-align:center;font-size:11px;padding:4px 3px}
+.pg td.pw.out{background:repeating-linear-gradient(45deg,transparent 0 4px,var(--we) 4px 6px)}
+.pg .pn{position:sticky;left:0;background:var(--panel);z-index:1;min-width:180px;max-width:230px}
+.pg .pn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg td.cur,.pg th.cur{box-shadow:inset 0 0 0 2px var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:var(--panel);color:var(--text);padding:6px 12px;cursor:pointer;font:inherit}
+.seg button.on{background:var(--accent);color:#fff}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:4px;border:1px solid var(--line)}
+/* Kalender */
+.cal{overflow:auto;max-height:76vh;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.cal table{width:auto;font-size:12px;border-collapse:separate;border-spacing:0}
+.cal th,.cal td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;text-align:center;min-width:31px;height:36px}
+.cal thead th{position:sticky;top:0;background:var(--panel);z-index:3;height:22px;color:var(--muted);font-weight:500}
+.cal thead tr:nth-child(2) th{top:22px;height:34px}
+.cal th.name,.cal td.name{position:sticky;left:0;background:var(--panel);text-align:left;padding:0 10px;min-width:170px;max-width:220px;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal thead th.name{z-index:4}
+.cal td.tot{padding:0 8px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cal th.hol{background:var(--hol);color:var(--text)}
+.cal th.today{box-shadow:inset 0 -3px 0 var(--accent);color:var(--accent);font-weight:700}
+.cal th.we{background:var(--we)}
+.cal tr.sep td{height:24px;background:var(--bg);text-align:left;padding-left:10px;font-weight:600;color:var(--muted)}
+.c{cursor:pointer;position:relative;vertical-align:top!important}
+.c:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+.c.we{background:var(--we)}
+.c.hol{background:var(--hol)}
+.c.holhalf{background:linear-gradient(135deg,var(--hol) 50%,transparent 50%)}
+.c.abs-urlaub{background:var(--abs-urlaub)}.c.abs-krank{background:var(--abs-krank)}.c.abs-schulung{background:var(--abs-schulung)}.c.abs-gleitzeit{background:var(--abs-gleitzeit)}.c.abs-sonstiges{background:var(--abs-sonstiges)}
+.c.half.abs-urlaub{background:linear-gradient(135deg,var(--abs-urlaub) 50%,transparent 50%)}
+.c.half.abs-krank{background:linear-gradient(135deg,var(--abs-krank) 50%,transparent 50%)}
+.c.half.abs-schulung{background:linear-gradient(135deg,var(--abs-schulung) 50%,transparent 50%)}
+.c.half.abs-gleitzeit{background:linear-gradient(135deg,var(--abs-gleitzeit) 50%,transparent 50%)}
+.c.half.abs-sonstiges{background:linear-gradient(135deg,var(--abs-sonstiges) 50%,transparent 50%)}
+.c.req::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent 0 4px,rgba(127,127,127,.18) 4px 6px);pointer-events:none}
+.c.over{box-shadow:inset 0 0 0 2px var(--bad)}
+.c.today{box-shadow:inset 0 0 0 1px var(--accent)}
+.chips{display:flex;height:7px;margin:3px 3px 0;gap:1px}
+.chips i{display:block;border-radius:2px;min-width:3px}
+.chips i.fade{opacity:.18}
+.c .v{display:block;font-size:11px;line-height:14px;margin-top:2px;font-variant-numeric:tabular-nums}
+.c .l{display:block;font-size:10px;line-height:12px;font-weight:600;opacity:.8}
+.c .ist{position:absolute;right:2px;bottom:1px;font-size:9px;color:var(--ok)}
+.c .ms{position:absolute;left:2px;bottom:1px;font-size:9px}
+.wk{cursor:pointer;min-width:58px!important;font-variant-numeric:tabular-nums;font-size:11px}
+.wk:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+.pc{font-size:11px;font-variant-numeric:tabular-nums}
+/* Gantt */
+.gantt{position:relative;min-width:760px}
+.g-row{display:grid;grid-template-columns:200px 1fr;align-items:center;height:30px;border-bottom:1px solid var(--line)}
+.g-row .gl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.g-track{position:relative;height:100%}
+.g-bar{position:absolute;top:8px;height:14px;border-radius:4px;opacity:.85}
+.g-ms{position:absolute;top:8px;width:12px;height:12px;transform:rotate(45deg);margin-left:-6px;border:2px solid var(--panel);background:var(--text)}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px dashed var(--line)}
+.g-grid.q{border-left:1px solid var(--muted);opacity:.5}
+.g-today{position:absolute;top:0;bottom:0;border-left:2px solid var(--bad);z-index:2}
+.g-head{display:grid;grid-template-columns:200px 1fr;font-size:11px;color:var(--muted)}
+.g-months{display:grid;grid-template-columns:repeat(12,1fr)}
+.g-months span{padding:2px 4px;border-left:1px solid var(--line)}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(10,14,22,.45);display:flex;align-items:flex-start;justify-content:center;padding:6vh 12px;z-index:100;overflow:auto}
+.modal.hidden{display:none}
+.mbox{background:var(--panel);border-radius:12px;width:min(680px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--line)}
+.mhead{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.mhead h3{margin:0;font-size:16px;flex:1}
+.mbody{padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.grid2 .full{grid-column:1/-1}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld>span{font-size:12px;color:var(--muted);font-weight:600}
+.fld small{color:var(--muted);font-size:11px}
+.fld.cb{flex-direction:row;align-items:center;gap:8px}
+.wds{display:flex;gap:4px;flex-wrap:wrap}
+.wds label{display:flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:4px 8px;cursor:pointer}
+.actions{display:flex;gap:8px;align-items:center;margin-top:4px}.actions .sp{flex:1}
+.warnlist{margin:0;padding:0;list-style:none}
+.warnlist li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:baseline}
+.empty{padding:16px;text-align:center;color:var(--muted)}
+.help{font-size:12px;color:var(--muted);margin:0 0 10px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+.fhero{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.fbig{display:flex;flex-direction:column;align-items:center;min-width:150px;padding:6px 18px;border-right:1px solid var(--line)}
+.fbig b{font-size:46px;line-height:1;font-variant-numeric:tabular-nums}.fbig span{font-weight:600}.fbig small{color:var(--muted);font-size:12px;margin-top:2px}
+.ftext{flex:1;min-width:300px}.ftext p{margin:0 0 10px}
+.stack{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px;background:var(--we)}.stack i{display:block;min-width:4px}
+.fseg{background:repeating-linear-gradient(45deg,#1f9d5555 0 6px,#1f9d5522 6px 12px)}
+.fmx td{min-width:52px;height:30px;font-variant-numeric:tabular-nums}
+.fmx tr.fsum td{border-top:2px solid var(--muted)}
+.ffree.pos{background:#1f9d5530;color:var(--ok);font-weight:700}.ffree.neg{background:#d6454530;color:var(--bad);font-weight:700}.ffree.zero{color:var(--muted)}
+.fcal{width:auto;border-collapse:separate;border-spacing:4px}.fcal th,.fcal td{border:0;text-align:center;padding:2px 6px}
+.fcal td.fd{width:64px;height:44px;border-radius:7px;cursor:pointer;position:relative;padding:3px}
+.fcal td.fd span{display:block;font-size:10px;color:var(--muted)}.fcal td.fd b{font-size:14px;font-variant-numeric:tabular-nums}
+.fcal td.fd:hover{box-shadow:inset 0 0 0 2px var(--accent)}.fcal td.fd.over{box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
+.fcal td.fd.today{outline:2px solid var(--accent)}.fcal td.fd.past{opacity:.45}
+.c.sel::before{content:"";position:absolute;inset:0;background:rgba(47,111,222,.28);pointer-events:none}
+.cal table{user-select:none}.cal.painting td.c{cursor:crosshair}
+.tag.tent{border:1px dashed currentColor}
+.chips i.tent,.tentbg{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.65) 0 2px,transparent 2px 4px)!important}
+.paintbar{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px dashed var(--accent);border-radius:8px;background:var(--accent2);margin-bottom:10px;flex-wrap:wrap}
+.paintbar label{display:flex;gap:4px;align-items:center}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--panel);padding:9px 14px;border-radius:9px;z-index:200;display:flex;gap:12px;align-items:center;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.toast button{background:none;border:1px solid currentColor;color:inherit;border-radius:5px;padding:2px 9px;cursor:pointer;font:inherit}
+.btn:disabled{opacity:.4;cursor:default}
+.kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:11px;background:var(--panel)}
+@media print{nav,header .noprint,.toolbar,.btn{display:none!important}body{background:#fff}.card{break-inside:avoid;border-color:#ccc}.cal{max-height:none;overflow:visible}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand"><span class="logo">PT</span><div><b>PT-Planer</b><small>Projekte · Personentage</small></div></div>
+  <nav id="nav"></nav>
+  <div class="sfoot"><span class="tag info" id="blTag"></span><div class="ver"><a href="https://github.com/NoAuthZone/PT-Planer" target="_blank" rel="noopener" title="Projektseite auf GitHub">GitHub</a> · <a href="#" data-act="goTab" data-v="data" id="verLink">v1.0.0</a></div></div>
+</aside>
+<div class="mainwrap">
+<header class="top">
+  <div class="seg" id="granSeg"><button data-gran="Y">Jahr</button><button data-gran="Q">Quartal</button><button data-gran="M">Monat</button><button data-gran="W">Woche</button></div>
+  <span class="pnav"><button class="btn sm" id="pPrev" title="vorheriger Zeitraum">‹</button><select id="selYear" title="Jahr"></select><select id="selPv" title="Zeitraum"></select><button class="btn sm" id="pNext" title="nächster Zeitraum">›</button><button class="btn sm ghost" id="pNow">Heute</button></span>
+  <span class="sp"></span>
+  <button class="btn noprint" id="btnDemo" title="Mit Beispieldaten ausprobieren – deine eigenen Daten bleiben unberührt">🧪 Demo</button>
+  <button class="btn search noprint" id="btnPal" title="Schnellzugriff (Strg+K)">🔍 Suchen &amp; Aktionen <span class="kbd">Strg K</span></button>
+  <button class="btn ghost noprint" id="btnTheme" title="Hell/Dunkel">🌓</button>
+  <button class="btn ghost noprint" onclick="window.print()" title="Drucken">🖨</button>
+</header>
+<main id="view"></main>
+</div>
+</div>
+<div id="modal" class="modal hidden"><div class="mbox"><div class="mhead"><h3 id="mtitle"></h3><button class="btn ghost" data-close>✕</button></div><div class="mbody" id="mbody"></div></div></div>
+<input type="file" id="fileImport" accept=".json,application/json" hidden>
+
+<script>
+'use strict';
+/* ====================== Konstanten ====================== */
+const APP={name:'PT-Planer',version:'1.0.0',date:'2026-11-25',repo:'https://github.com/NoAuthZone/PT-Planer',license:'MIT'};
+const KEY='ptplaner.v1';
+const BL={BW:'Baden-Württemberg',BY:'Bayern',BE:'Berlin',BB:'Brandenburg',HB:'Bremen',HH:'Hamburg',HE:'Hessen',MV:'Mecklenburg-Vorpommern',NI:'Niedersachsen',NW:'Nordrhein-Westfalen',RP:'Rheinland-Pfalz',SL:'Saarland',SN:'Sachsen',ST:'Sachsen-Anhalt',SH:'Schleswig-Holstein',TH:'Thüringen'};
+const WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const ABS={urlaub:{t:'Urlaub',s:'U'},krank:{t:'Krank',s:'K'},schulung:{t:'Schulung / Konferenz',s:'S'},gleitzeit:{t:'Gleittag / Überstundenabbau',s:'G'},sonstiges:{t:'Sonstige Abwesenheit',s:'A'}};
+const PSTATUS={geplant:'geplant',aktiv:'aktiv',pausiert:'pausiert',abgeschlossen:'abgeschlossen'};
+const AMOUNTS=[{v:1,t:'1 – ganzer Tag'},{v:0.75,t:'0,75 – Dreivierteltag'},{v:0.5,t:'0,5 – halber Tag'},{v:0.25,t:'0,25 – Vierteltag'},{v:0,t:'0 – Ausnahme (feste Zuordnung aussetzen)'}];
+const PALETTE=['#2f6fde','#e4572e','#17a589','#8e6cd9','#f2a541','#d64593','#3fa7d6','#6b8f23','#b5651d','#5c6bc0'];
+
+/* ====================== Datum ====================== */
+const pad=n=>String(n).padStart(2,'0');
+const fromD=t=>t.getUTCFullYear()+'-'+pad(t.getUTCMonth()+1)+'-'+pad(t.getUTCDate());
+const iso=(y,m,d)=>fromD(new Date(Date.UTC(y,m-1,d)));
+const toD=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));};
+const addDays=(s,n)=>{const t=toD(s);t.setUTCDate(t.getUTCDate()+n);return fromD(t);};
+const wday=s=>toD(s).getUTCDay();
+function*days(a,b){for(let s=a;s<=b;s=addDays(s,1))yield s;}
+const fmtDE=s=>s?s.slice(8,10)+'.'+s.slice(5,7)+'.'+s.slice(0,4):'';
+const fmtDM=s=>s?s.slice(8,10)+'.'+s.slice(5,7)+'.':'';
+const qRange=(y,q)=>q?[iso(y,(q-1)*3+1,1),iso(y,q*3+1,0)]:[iso(y,1,1),iso(y,12,31)];
+const mRange=(y,m)=>[iso(y,m,1),iso(y,m+1,0)];
+const todayISO=(()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());})();
+function isoWeek(s){const t=toD(s);t.setUTCDate(t.getUTCDate()+3-(t.getUTCDay()+6)%7);const w1=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-w1)/864e5-3+(w1.getUTCDay()+6)%7)/7);}
+const monday=s=>addDays(s,-((wday(s)+6)%7));
+const maxS=(a,b)=>a>b?a:b, minS=(a,b)=>a<b?a:b;
+
+/* ====================== Format ====================== */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fN=(n,d=2)=>(Math.round((+n||0)*100)/100).toLocaleString('de-DE',{maximumFractionDigits:d});
+const fPT=n=>{n=Math.round((+n||0)*100)/100;if(n===0.5)return '½';if(n%1===0.5)return Math.floor(n)+'½';return fN(n);};
+const fEUR=n=>(+n||0).toLocaleString('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const pct=(a,b)=>b>0?Math.round(a/b*100):(a>0?999:0);
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+const ratioCol=r=>r>1.0001?'var(--bad)':r>=0.85?'var(--warn)':'var(--ok)';
+function bar(v,max,color,mark){const w=max>0?Math.min(100,v/max*100):(v>0?100:0);return `<div class="bar" title="${fN(v)} / ${fN(max)}"><i style="width:${w}%;background:${color||ratioCol(max>0?v/max:(v>0?2:0))}"></i>${mark!=null?`<em style="left:${Math.min(100,mark)}%"></em>`:''}</div>`;}
+
+/* ====================== Zustand ====================== */
+const now=new Date();
+const ui={paint:{on:false,what:'',amount:1,fill:true,tent:false},tab:'dash',year:now.getFullYear(),q:Math.floor(now.getMonth()/3)+1,month:now.getMonth()+1,calMode:'month',filterProject:'',filterPerson:'',holBL:'',bookFilter:''};
+try{Object.assign(ui,JSON.parse(localStorage.getItem(KEY+'.ui')||'{}'));}catch(e){}
+if(!ui.gran){ui.gran=ui.q===0?'Y':'Q';ui.pv=ui.q||Math.floor(now.getMonth()/3)+1;}
+ui.projGran=ui.projGran||'Q';
+let ACTIVE=ui.demo?KEY+'.demo':KEY;
+let S=load()||(ui.demo?demo():null)||migrate({settings:defaultSettings()});
+let LAST=JSON.stringify(S);const UNDO=[],REDO=[];
+
+function load(){try{const s=JSON.parse(localStorage.getItem(ACTIVE));if(s&&s.people&&s.projects)return migrate(s);}catch(e){}return null;}
+function migrate(s){delete s._meta;s.settings=Object.assign(defaultSettings(),s.settings||{});for(const k of ['people','projects','allocations','rules','absences','custom'])s[k]=s[k]||[];return s;}
+function persist(){hCache.clear();wdCache.clear();try{localStorage.setItem(ACTIVE,JSON.stringify(S));localStorage.setItem(KEY+'.ui',JSON.stringify(ui));}catch(e){}}
+function setDemo(on,reset){persist();ui.demo=on;ACTIVE=on?KEY+'.demo':KEY;S=(!reset&&load())||(on?demo():migrate({settings:defaultSettings()}));
+  LAST=JSON.stringify(S);UNDO.length=0;REDO.length=0;persist();closeModal();ui.tab='dash';render();window.scrollTo(0,0);
+  toast(on?(reset?'Demo neu geladen':'Demo-Modus: Beispieldaten – deine eigenen Daten bleiben unberührt'):'Zurück bei deinen eigenen Daten');}
+function save(){const cur=JSON.stringify(S);if(cur!==LAST){UNDO.push(LAST);if(UNDO.length>60)UNDO.shift();REDO.length=0;LAST=cur;}persist();}
+function undo(){if(!UNDO.length)return toast('Nichts zum Rückgängigmachen');REDO.push(LAST);LAST=UNDO.pop();S=migrate(JSON.parse(LAST));persist();closeModal();render();toast('Rückgängig gemacht',[['Wiederholen',redo]]);}
+function redo(){if(!REDO.length)return toast('Nichts zum Wiederholen');UNDO.push(LAST);LAST=REDO.pop();S=migrate(JSON.parse(LAST));persist();closeModal();render();toast('Wiederhergestellt',[['Rückgängig',undo]]);}
+let toastT;function toast(msg,acts=[]){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.innerHTML=`<span>${esc(msg)}</span>`;for(const[l,f] of acts){const b=document.createElement('button');b.textContent=l;b.onclick=()=>{t.remove();f();};t.appendChild(b);}
+  clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),5000);}
+const curHolBL=()=>ui.holBL==='-'?'':(ui.holBL||S.settings.bl);
+const blName=bl=>bl?BL[bl]:'nur bundesweite Feiertage';
+function defaultSettings(){return{bl:'',hoursPerDay:8,halfXmas:true,halfNye:true,absReduces:'alle',teamName:'Mein Team'};}
+const person=id=>S.people.find(p=>p.id===id);
+const project=id=>S.projects.find(p=>p.id===id);
+
+/* ====================== Feiertage ====================== */
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return iso(y,mo,da);}
+const hCache=new Map();
+function holidays(y,bl){
+  const ck=y+'|'+bl;if(hCache.has(ck))return hCache.get(ck);
+  const e=easter(y),E=n=>addDays(e,n),L=[];
+  const add=(c,d,n,f=1,kind='gesetzlich')=>{if(c)L.push([d,n,f,kind]);};
+  add(1,iso(y,1,1),'Neujahr');
+  add(['BW','BY','ST'].includes(bl),iso(y,1,6),'Heilige Drei Könige');
+  add((bl==='BE'&&y>=2019)||(bl==='MV'&&y>=2023),iso(y,3,8),'Internationaler Frauentag');
+  add(1,E(-2),'Karfreitag');
+  add(bl==='BB',e,'Ostersonntag');
+  add(1,E(1),'Ostermontag');
+  add(1,iso(y,5,1),'Tag der Arbeit');
+  add(bl==='BE'&&(y===2020||y===2025),iso(y,5,8),'Tag der Befreiung');
+  add(1,E(39),'Christi Himmelfahrt');
+  add(bl==='BB',E(49),'Pfingstsonntag');
+  add(1,E(50),'Pfingstmontag');
+  add(['BW','BY','HE','NW','RP','SL'].includes(bl),E(60),'Fronleichnam');
+  add(bl==='SL'||bl==='BY',iso(y,8,15),'Mariä Himmelfahrt'+(bl==='BY'?' (überw. kath. Gemeinden)':''));
+  add(bl==='TH'&&y>=2019,iso(y,9,20),'Weltkindertag');
+  add(1,iso(y,10,3),'Tag der Deutschen Einheit');
+  add(['BB','MV','SN','ST','TH'].includes(bl)||(['HB','HH','NI','SH'].includes(bl)&&y>=2018)||y===2017,iso(y,10,31),'Reformationstag');
+  add(['BW','BY','NW','RP','SL'].includes(bl),iso(y,11,1),'Allerheiligen');
+  if(bl==='SN'){let d=iso(y,11,22);while(wday(d)!==3)d=addDays(d,-1);L.push([d,'Buß- und Bettag',1,'gesetzlich']);}
+  add(1,iso(y,12,25),'1. Weihnachtstag');
+  add(1,iso(y,12,26),'2. Weihnachtstag');
+  add(S.settings.halfXmas,iso(y,12,24),'Heiligabend (halber Tag)',0.5,'betrieblich');
+  add(S.settings.halfNye,iso(y,12,31),'Silvester (halber Tag)',0.5,'betrieblich');
+  for(const c of S.custom){if(c.bl&&c.bl!==bl)continue;for(const d of days(maxS(c.from,iso(y,1,1)),minS(c.to||c.from,iso(y,12,31))))L.push([d,c.name,+c.factor||1,'betrieblich']);}
+  const m=new Map();
+  for(const[d,n,f,k] of L.sort((a,b)=>a[0]<b[0]?-1:1)){const o=m.get(d);if(!o||f>o.factor)m.set(d,{name:o?o.name+' / '+n:n,factor:f,kind:k});}
+  hCache.set(ck,m);return m;
+}
+function stdWorkdays(from,to,bl){let n=0,h=0;for(const s of days(from,to)){const w=wday(s);if(w===0||w===6)continue;const x=holidays(+s.slice(0,4),bl).get(s);n+=1-(x?x.factor:0);if(x)h+=x.factor;}return{n,h};}
+
+/* ====================== Rechenkern ====================== */
+let IDX=null;
+function buildIdx(){
+  const single=new Map(),rules={},abs={};
+  for(const a of S.allocations){const k=a.personId+'|'+a.date;if(!single.has(k))single.set(k,[]);single.get(k).push(a);}
+  for(const r of S.rules)(rules[r.personId]||(rules[r.personId]=[])).push(r);
+  for(const a of S.absences)(abs[a.personId]||(abs[a.personId]=[])).push(a);
+  IDX={single,rules,abs,proj:Object.fromEntries(S.projects.map(p=>[p.id,p])),memo:new Map()};
+}
+function absAmount(a,s){if(s<a.from||s>a.to)return 0;if(a.from===a.to)return(a.halfStart||a.halfEnd)?0.5:1;if(s===a.from&&a.halfStart)return 0.5;if(s===a.to&&a.halfEnd)return 0.5;return 1;}
+function dayInfo(p,s){
+  const key=p.id+'|'+s;const mm=IDX.memo.get(key);if(mm)return mm;
+  const bl=p.bl||S.settings.bl,hol=holidays(+s.slice(0,4),bl).get(s)||null,w=wday(s);
+  const base=(p.workdays||[]).includes(w)?1:0,hf=hol?hol.factor:0,free=base*(1-hf),fte=p.fte??1;
+  let absAmt=0,vacG=0,vacB=0;const absl=[];
+  for(const a of IDX.abs[p.id]||[]){const am=absAmount(a,s);if(!am)continue;absl.push({a,am});
+    const counts=S.settings.absReduces==='alle'||a.status==='genehmigt';if(counts)absAmt+=am;
+    if(a.type==='urlaub'){const used=Math.min(am,free);if(a.status==='genehmigt')vacG+=used;else vacB+=used;}}
+  const absEff=Math.min(free,absAmt*base),avail=Math.max(0,free-absEff)*fte;
+  const plan=[],ist=[],overridden=new Set();let singlePlan=0;
+  for(const a of IDX.single.get(key)||[]){const x={pid:a.projectId,amt:+a.amount||0,src:'single',ref:a,tent:!!a.tentative};if(a.type==='ist')ist.push(x);else{plan.push(x);overridden.add(a.projectId);singlePlan+=x.amt;}}
+  let rem=avail-singlePlan;
+  for(const r of IDX.rules[p.id]||[]){
+    if(s<r.from||s>r.to||!(r.weekdays||[]).includes(w)||overridden.has(r.projectId))continue;
+    const pr=IDX.proj[r.projectId];if(!pr||(pr.start&&s<pr.start)||(pr.end&&s>pr.end))continue;
+    const amt=Math.min(+r.amount||0,Math.max(0,rem));if(amt>0){plan.push({pid:r.projectId,amt,src:'rule',ref:r});rem-=amt;}
+  }
+  const planSum=plan.reduce((t,x)=>t+x.amt,0),istSum=ist.reduce((t,x)=>t+x.amt,0);
+  const d={s,w,base,hol,hf,absl,absEff,avail,plan,ist,planSum,istSum,vacG,vacB,over:planSum>avail+1e-9};
+  IDX.memo.set(key,d);return d;
+}
+function aggPerson(p,from,to){
+  const r={tent:0,wd:0,hol:0,abs:0,avail:0,plan:0,ist:0,vacG:0,vacB:0,byP:{},overDays:[]};
+  for(const s of days(from,to)){const d=dayInfo(p,s);
+    if(d.base){r.wd++;r.hol+=d.hf;r.abs+=d.absEff;}
+    r.avail+=d.avail;r.plan+=d.planSum;r.ist+=d.istSum;r.vacG+=d.vacG;r.vacB+=d.vacB;
+    for(const x of d.plan){(r.byP[x.pid]||(r.byP[x.pid]={plan:0,ist:0})).plan+=x.amt;if(x.tent)r.tent+=x.amt;}
+    for(const x of d.ist)(r.byP[x.pid]||(r.byP[x.pid]={plan:0,ist:0})).ist+=x.amt;
+    if(d.over)r.overDays.push(s);}
+  return r;
+}
+function aggAll(from,to){
+  const people={},projects={};for(const pr of S.projects)projects[pr.id]={plan:0,ist:0,byPerson:{}};
+  for(const p of S.people){const a=aggPerson(p,from,to);people[p.id]=a;
+    for(const[pid,v] of Object.entries(a.byP)){if(!projects[pid])continue;projects[pid].plan+=v.plan;projects[pid].ist+=v.ist;projects[pid].byPerson[p.id]=v;}}
+  return{people,projects};
+}
+/* ---------- Zeiträume & Budget-Raster ---------- */
+const GRAN={T:'Gesamtprojekt',Y:'Jahr',Q:'Quartal',M:'Monat',W:'Woche'};
+const weekRange=(y,n)=>{const m=addDays(monday(iso(y,1,4)),7*(n-1));return[m,addDays(m,6)];};
+const weeksIn=y=>isoWeek(iso(y,12,28));
+function gMax(g,y){return g==='Q'?4:g==='M'?12:g==='W'?weeksIn(y):1;}
+function curRange(){const y=ui.year;return ui.gran==='Y'?qRange(y,0):ui.gran==='M'?mRange(y,ui.pv):ui.gran==='W'?weekRange(y,ui.pv):qRange(y,ui.pv);}
+function curOf(g,y){const t=todayISO;if(g==='Q')return Math.floor((+t.slice(5,7)-1)/3)+1;if(g==='M')return +t.slice(5,7);if(g==='W')return isoWeek(t);return 1;}
+function periodsOf(unit,y,pr){
+  switch(unit){
+    case 'T':return[{key:'T',label:'Gesamtes Projekt',from:pr?.start||iso(y,1,1),to:pr?.end||iso(y,12,31)}];
+    case 'Y':return[{key:y+'-Y',label:String(y),from:iso(y,1,1),to:iso(y,12,31)}];
+    case 'Q':return[1,2,3,4].map(q=>{const[a,b]=qRange(y,q);return{key:y+'-Q'+q,label:'Q'+q,from:a,to:b,n:q};});
+    case 'M':return MONTHS.map((m,i)=>{const[a,b]=mRange(y,i+1);return{key:y+'-M'+pad(i+1),label:m,short:m.slice(0,3),from:a,to:b,n:i+1};});
+    case 'W':return[...Array(weeksIn(y))].map((_,i)=>{const[a,b]=weekRange(y,i+1);return{key:y+'-W'+pad(i+1),label:'KW '+(i+1),short:String(i+1),from:a,to:b,n:i+1};});}
+  return[];}
+function keyRange(k,pr){if(k==='T')return[pr.start||iso(ui.year,1,1),pr.end||iso(ui.year,12,31)];
+  const m=String(k).match(/^(\d{4})-(Y|Q([1-4])|M(\d\d)|W(\d\d))$/);if(!m)return null;const y=+m[1];
+  if(m[2]==='Y')return qRange(y,0);if(m[3])return qRange(y,+m[3]);if(m[4])return mRange(y,+m[4]);return weekRange(y,+m[5]);}
+const wdCache=new Map();
+function wdC(a,b){if(a>b)return 0;const k=a+'|'+b+'|'+S.settings.bl;if(!wdCache.has(k))wdCache.set(k,stdWorkdays(a,b,S.settings.bl).n);return wdCache.get(k);}
+function budgetRange(pr,from,to,bud){let t=0;const cs=pr.start||'0000-01-01',ce=pr.end||'9999-12-31';
+  for(const[k,v] of Object.entries(bud||pr.budget||{})){const pt=+v||0;if(!pt)continue;const r=keyRange(k,pr);if(!r)continue;
+    let R0=maxS(r[0],cs),R1=minS(r[1],ce);if(R0>R1||!wdC(R0,R1)){R0=r[0];R1=r[1];}   // Budget nur innerhalb der Projektlaufzeit verteilen
+    const a=maxS(R0,from),b=minS(R1,to);if(a>b)continue;if(a===R0&&b===R1){t+=pt;continue;}const full=wdC(R0,R1);if(full>0)t+=pt*wdC(a,b)/full;}return t;}
+function budgetOf(pr,y,q){return budgetRange(pr,...qRange(y,q));}
+const r2=n=>Math.round(n*100)/100;
+function convertBudget(bud,toU,pr){
+  const keys=Object.keys(bud).filter(k=>+bud[k]);if(!keys.length)return{};
+  if(toU==='T')return{T:r2(keys.reduce((t,k)=>t+(+bud[k]),0))};
+  const ys=new Set();for(const k of keys){const r=keyRange(k,pr);if(!r)continue;for(let y=+r[0].slice(0,4)-1;y<=+r[1].slice(0,4)+1;y++)ys.add(y);}
+  const out={};for(const y of ys)for(const p of periodsOf(toU,y,pr)){const v=budgetRange(pr,p.from,p.to,bud);if(v>0.004)out[p.key]=r2(v);}
+  const diff=r2(keys.reduce((t,k)=>t+(+bud[k]),0)-Object.values(out).reduce((t,v)=>t+v,0)),ks=Object.keys(out);   // Rundungsrest ausgleichen
+  if(diff&&ks.length){const big=ks.reduce((m,k)=>out[k]>out[m]?k:m,ks[0]);out[big]=r2(out[big]+diff);}
+  return out;}
+function projDayPlan(from,to){const M={};for(const p of S.people)for(const s of days(from,to))for(const x of dayInfo(p,s).plan){if(!x.amt)continue;const m=M[x.pid]||(M[x.pid]={});m[s]=(m[s]||0)+x.amt;}return M;}
+const sumDays=(m,a,b)=>{let t=0;if(m)for(const s of days(a,b))t+=m[s]||0;return t;};
+function vacation(p,y){const a=aggPerson(p,iso(y,1,1),iso(y,12,31));const ent=(+p.vacation||0)+(+(p.carry||{})[y]||0);return{ent,taken:a.vacG,req:a.vacB,rest:ent-a.vacG-a.vacB};}
+function absDays(a){const p=person(a.personId);if(!p)return 0;let n=0;for(const s of days(a.from,a.to)){const d=dayInfo(p,s);const am=absAmount(a,s);n+=Math.min(am,d.base*(1-d.hf));}return n;}
+function bridges(y,bl){const out=[],H=holidays(y,bl);for(const[d,h] of H){if(h.factor<1)continue;const w=wday(d);
+  const cand=w===2?addDays(d,-1):w===4?addDays(d,1):null;if(cand&&!H.has(cand))out.push({bridge:cand,hol:d,name:h.name,gain:'1 Urlaubstag → 4 freie Tage'});
+  if(w===3)out.push({bridge:addDays(d,-2)+'|'+addDays(d,-1),hol:d,name:h.name,gain:'2 Urlaubstage (Mo+Di oder Do+Fr) → 5 freie Tage'});}
+  return out;}
+
+function warnings(from,to,A){
+  const W=[];const y=ui.year;
+  for(const p of S.people){const a=A.people[p.id];if(a.overDays.length)W.push(['bad',`<b>${esc(p.name)}</b> ist an ${a.overDays.length} Tag(en) überbucht (z. B. ${a.overDays.slice(0,4).map(fmtDM).join(', ')}${a.overDays.length>4?' …':''}).`]);
+    const v=vacation(p,y);if(v.rest<0)W.push(['bad',`<b>${esc(p.name)}</b>: Urlaubsanspruch ${y} um ${fN(-v.rest)} Tage überschritten.`]);}
+  for(const pr of S.projects){const b=budgetRange(pr,from,to),pl=A.projects[pr.id].plan;
+    if(b>0&&pl>b+1e-9)W.push(['bad',`Projekt <b>${esc(pr.name)}</b>: Plan ${fN(pl)} PT > Budget ${fN(b)} PT (+${fN(pl-b)}).`]);
+    else if(b>0&&pl<b*0.7&&pr.status==='aktiv')W.push(['warn',`Projekt <b>${esc(pr.name)}</b>: erst ${pct(pl,b)} % des Budgets verplant (${fN(b-pl)} PT offen).`]);
+    if(b===0&&pl>0)W.push(['warn',`Projekt <b>${esc(pr.name)}</b>: ${fN(pl)} PT verplant, aber kein Budget im Zeitraum hinterlegt.`]);}
+  const out={};for(const a of S.allocations){if(a.date<from||a.date>to)continue;const pr=project(a.projectId);if(pr&&((pr.start&&a.date<pr.start)||(pr.end&&a.date>pr.end))){out[pr.id]=(out[pr.id]||0)+1;}}
+  for(const[pid,n] of Object.entries(out))W.push(['warn',`${n} Buchung(en) für <b>${esc(project(pid).name)}</b> liegen außerhalb der Projektlaufzeit.`]);
+  for(const p of S.people){let n=0;for(const a of S.allocations){if(a.personId!==p.id||a.date<from||a.date>to||!(+a.amount))continue;const d=dayInfo(p,a.date);if(d.avail<=0)n++;}
+    if(n)W.push(['warn',`<b>${esc(p.name)}</b>: ${n} Buchung(en) auf Feiertag, Wochenende oder Abwesenheit.`]);}
+  return W;
+}
+
+/* ====================== Rendering ====================== */
+const TABS_OLD=[['dash','Übersicht'],['cal','Kalender'],['free','Restkapazität'],['proj','Projekte & Quartale'],['book','Buchungen & feste Tage'],['team','Team & Urlaub'],['hol','Feiertage & Arbeitstage'],['data','Einstellungen & Daten']];
+const NAV=[['Überblick',[['dash','◎','Übersicht'],['free','◔','Restkapazität']]],['Planung',[['cal','▦','Kalender'],['book','≡','Buchungen']]],['Stammdaten',[['proj','◆','Projekte & Budgets'],['team','☺','Team & Urlaub']]],['System',[['hol','✦','Feiertage'],['data','⚙','Einstellungen & Daten']]]];
+const HEADS={
+  dash:{t:'Übersicht',s:()=>`${rangeLabel()} · Kapazität, Planung und Budgets auf einen Blick`,a:'<button class="btn" data-act="newProject">+ Projekt</button><button class="btn primary" data-act="newBooking">+ Buchung</button>'},
+  free:{t:'Restkapazität',s:()=>`Wie viele Tage hat eine Person im Zeitraum ${rangeLabel()} noch frei?`},
+  cal:{t:'Kalender',s:'Tage planen – klicken, über mehrere Tage ziehen oder mit 🖌 malen',a:'<button class="btn" data-act="newAbsence">+ Abwesenheit</button><button class="btn primary" data-act="newBooking">+ Buchung</button>'},
+  book:{t:'Buchungen',s:()=>`Feste Wochentage und einzelne Buchungen · ${rangeLabel()}`},
+  proj:{t:'Projekte & Budgets',s:'Plan und Budget je Quartal, Monat oder Woche · Laufzeiten und Meilensteine'},
+  team:{t:'Team & Urlaub',s:()=>`Personen, Arbeitszeit, Urlaubskonto ${ui.year} und Abwesenheiten`},
+  hol:{t:'Feiertage & Arbeitstage',s:()=>`Gesetzliche und betriebliche Feiertage ${ui.year}, Arbeitstage je Quartal und Monat`},
+  data:{t:'Einstellungen & Daten',s:'Bundesland, halbe Tage, Backup, Import und Export'}};
+function navBadges(){const b={};try{const[f,t]=curRange();const A=aggAll(f,t);const W=warnings(f,t,A);const nb=W.filter(w=>w[0]==='bad').length;if(nb)b.dash=['bad',nb];
+  const tn=S.allocations.filter(a=>a.tentative&&a.date>=f&&a.date<=t).length;if(tn)b.book=['warn',tn];
+  const rq=S.absences.filter(a=>a.status==='beantragt'&&a.to>=todayISO).length;if(rq)b.team=['warn',rq];}catch(e){}return b;}
+function navHTML(){const B=navBadges();return NAV.map(([g,items])=>`<div class="ng">${g}</div>`+items.map(([k,i,t])=>`<button data-tab="${k}" class="${ui.tab===k?'on':''}"><i>${i}</i>${t}${B[k]?`<span class="bd ${B[k][0]}" title="${k==='dash'?'Konflikte':k==='book'?'vorläufige Buchungen':'offene Urlaubsanträge'}">${B[k][1]}</span>`:''}</button>`).join('')).join('');}
+function render(){
+  buildIdx();
+  document.getElementById('nav').innerHTML=navHTML();
+  document.querySelectorAll('#granSeg button').forEach(b=>b.classList.toggle('on',b.dataset.gran===ui.gran));
+  const sy=document.getElementById('selYear');const ys=[];for(let y=now.getFullYear()-3;y<=now.getFullYear()+4;y++)ys.push(y);if(!ys.includes(ui.year))ys.push(ui.year);
+  sy.innerHTML=ys.sort().map(y=>`<option ${y===ui.year?'selected':''}>${y}</option>`).join('');
+    const spv=document.getElementById('selPv');spv.style.display=ui.gran==='Y'?'none':'';
+  if(ui.gran!=='Y'){if(ui.pv>gMax(ui.gran,ui.year))ui.pv=gMax(ui.gran,ui.year);spv.innerHTML=periodsOf(ui.gran,ui.year).map(x=>`<option value="${x.n}" ${x.n===ui.pv?'selected':''}>${ui.gran==='W'?`KW ${x.n} · ${fmtDM(x.from)}–${fmtDM(x.to)}`:x.label}</option>`).join('');}
+  const bt=document.getElementById('blTag');bt.textContent=S.settings.bl?'Feiertage: '+BL[S.settings.bl]:'⚠ Kein Bundesland gewählt';bt.className='tag '+(S.settings.bl?'info':'warn');bt.style.cursor='pointer';bt.dataset.act='goTab';bt.dataset.v='data';bt.title=S.settings.bl?'Bundesland ändern':'Nur bundesweite Feiertage – Bundesland unter Einstellungen wählen';
+  const v=document.getElementById('view');
+  const H=HEADS[ui.tab]||HEADS.dash;
+  const bd=document.getElementById('btnDemo');bd.textContent=ui.demo?'🧪 Demo beenden':'🧪 Demo';bd.classList.toggle('primary',!!ui.demo);
+  v.innerHTML=(ui.demo?`<div class="demobar"><b>🧪 Demo-Modus</b><span>Du arbeitest mit Beispieldaten. Deine eigenen Daten bleiben unberührt und sind nach „Demo beenden“ wieder da.</span><span class="sp"></span><button class="btn sm" data-act="loadDemo">Demo zurücksetzen</button><button class="btn sm primary" data-act="demoOff">Demo beenden</button></div>`:'')+`<div class="phead"><div><h1>${H.t}</h1><p>${typeof H.s==='function'?H.s():H.s}</p></div><div class="pact">${H.a||''}</div></div>`+({dash:vDash,free:vFree,cal:vCal,proj:vProj,book:vBook,team:vTeam,hol:vHol,data:vData}[ui.tab])();
+  try{localStorage.setItem(KEY+'.ui',JSON.stringify(ui));}catch(e){}
+}
+const rangeLabel=()=>({Y:`Jahr ${ui.year}`,Q:`Q${ui.pv}/${ui.year}`,M:`${MONTHS[(ui.pv||1)-1]} ${ui.year}`,W:`KW ${ui.pv}/${ui.year}`})[ui.gran];
+const pDot=pr=>`<span class="dot" style="background:${esc(pr?.color||'#999')}"></span>`;
+const pName=id=>{const p=project(id);return p?pDot(p)+esc(p.name):'<i class="muted">gelöscht</i>';};
+
+/* ---------- Übersicht ---------- */
+function onboarding(){
+  const st=[[!!S.settings.bl,'1 · Bundesland wählen',S.settings.bl?`Feiertage werden für <b>${blName(S.settings.bl)}</b> berechnet.`:'Noch kein Bundesland gewählt – aktuell zählen nur die <b>bundesweiten</b> Feiertage.','<button class="btn sm primary" data-act="goTab" data-v="data">Bundesland wählen</button>'],
+    [S.people.length>0,'2 · Team anlegen','Personen mit Arbeitstagen, Teilzeit und Urlaubsanspruch.','<button class="btn sm primary" data-act="newPerson">+ Person</button>'],
+    [S.projects.length>0,'3 · Projekte & Budget','Laufzeit, Tagessatz und PT-Budget je Quartal, Monat oder Woche.','<button class="btn sm primary" data-act="newProject">+ Projekt</button>'],
+    [S.rules.length+S.allocations.length>0,'4 · Tage planen','Feste Wochentage anlegen oder im Kalender Tage ziehen bzw. malen.','<button class="btn sm" data-act="goTab" data-v="cal">Zum Kalender</button>']];
+  return `<div class="card"><h2>Erste Schritte</h2><div class="steps">${st.map(([d,t,x,b])=>`<div class="step ${d?'done':''}"><b>${t}</b><p class="small muted" style="margin:0 0 10px">${x}</p>${d?'':b}</div>`).join('')}</div>
+   <p class="help" style="margin-top:14px">Lieber erst ausprobieren? <button class="btn sm" data-act="loadDemo">🧪 Demo starten</button> – deine eigenen Daten bleiben dabei getrennt.</p></div>`;
+}
+function vDash(){
+  if(!S.people.length||!S.projects.length)return onboarding();
+  const[from,to]=curRange(),A=aggAll(from,to),sw=stdWorkdays(from,to,S.settings.bl);
+  let cap=0,plan=0,ist=0,bud=0,tent=0;for(const p of S.people){const a=A.people[p.id];cap+=a.avail;plan+=a.plan;ist+=a.ist;tent+=a.tent;}
+  for(const pr of S.projects)bud+=budgetRange(pr,from,to);
+  const W=warnings(from,to,A),nb=W.filter(w=>w[0]==='bad').length,free=cap-plan,hpd=+S.settings.hoursPerDay||8;
+  let h=`<div class="dk">
+   <div class="kpi click" data-act="goTab" data-v="free" title="Restkapazität je Person"><span>Freie Kapazität</span><b class="${free<0?'bad':'ok'}">${fN(free)} PT</b><span>von ${fN(cap)} PT · ${fN(sw.n)} Arbeitstage · ≙ ${fN(free*hpd,0)} h</span></div>
+   <div class="kpi"><span>Auslastung Team</span><b>${pct(plan,cap)} %</b>${bar(plan,cap)}<span>${fN(plan)} PT verplant${tent?` · ${fN(tent)} vorläufig`:''}</span></div>
+   <div class="kpi click" data-act="goTab" data-v="proj" title="Projekte & Budgets"><span>Budget-Deckung</span><b>${bud?pct(plan,bud)+' %':'–'}</b>${bar(plan,bud)}<span>Plan ${fN(plan)} von ${fN(bud)} PT Budget</span></div>
+   <div class="kpi"><span>Ist erfasst</span><b>${fN(ist)} PT</b>${bar(ist,plan,'var(--accent)')}<span>${pct(ist,plan)} % vom Plan</span></div></div>`;
+  if(W.length)h+=`<details class="card alerts ${nb?'has-bad':''}" ${nb?'open':''}><summary>${nb?`<span class="tag bad">${nb} Konflikt${nb>1?'e':''}</span>`:''}${W.length-nb?`<span class="tag warn">${W.length-nb} Hinweis${W.length-nb>1?'e':''}</span>`:''}<span class="muted small" style="font-weight:400">im Zeitraum ${rangeLabel()} – klicken zum ${nb?'Ein-/Ausklappen':'Anzeigen'}</span></summary>
+    <ul class="warnlist">${W.map(([t,m])=>`<li><span class="tag ${t}">${t==='bad'?'Konflikt':'Hinweis'}</span><span>${m}</span></li>`).join('')}</ul></details>`;
+  else h+=`<div class="card" style="padding:10px 16px"><span class="tag ok">Alles im grünen Bereich</span> <span class="small muted">Keine Konflikte im Zeitraum ${rangeLabel()}.</span></div>`;
+  // Projekte
+  const more=!!ui.dashMore;
+  h+=`<div class="dgrid"><div class="card"><h2>Projekte<span class="sp"></span><button class="btn sm ghost" data-act="dashMore">${more?'Weniger Spalten':'Mehr Spalten'}</button></h2>
+  <table><tr><th>Projekt</th><th class="n">Plan / Budget</th><th style="width:26%"></th><th class="n">Rest</th>${more?'<th class="n">Ist</th><th class="n">Kosten</th><th>Laufzeit</th>':''}<th></th></tr>`;
+  const rows=S.projects.map(pr=>({pr,b:budgetRange(pr,from,to),x:A.projects[pr.id]})).filter(r=>r.b||r.x.plan||r.x.ist||more).sort((a,b)=>(b.x.plan||b.b)-(a.x.plan||a.b));
+  for(const{pr,b,x} of rows){const rest=b-x.plan;
+    h+=`<tr><td>${pDot(pr)}<a href="#" data-act="budget" data-id="${pr.id}" title="Budget öffnen">${esc(pr.name)}</a> ${pr.status!=='aktiv'?statusTag(pr.status):''}</td><td class="n">${fN(x.plan)} / ${fN(b)}</td><td>${bar(x.plan,b,null,b>0&&x.ist?x.ist/b*100:null)}</td>
+    <td class="n ${rest<-1e-9?'bad':''}"><b>${fN(rest)}</b></td>${more?`<td class="n">${fN(x.ist)}</td><td class="n">${pr.dayRate?fEUR(x.plan*pr.dayRate):'–'}</td><td class="small muted">${fmtDM(pr.start)} – ${fmtDE(pr.end)}</td>`:''}
+    <td class="n"><button class="btn sm ghost" data-act="editProject" data-id="${pr.id}" title="Projekt bearbeiten">✎</button></td></tr>`;}
+  if(!rows.length)h+=`<tr><td colspan="${more?8:5}" class="empty">Keine Projekte mit Plan oder Budget im Zeitraum.</td></tr>`;
+  const hidden=S.projects.length-rows.length;
+  h+=`</table>${hidden?`<p class="help" style="margin:8px 0 0">${hidden} Projekt(e) ohne Plan/Budget im Zeitraum ausgeblendet – „Mehr Spalten“ zeigt alle.</p>`:''}</div>`;
+  // Team
+  h+=`<div class="card"><h2>Team<span class="sp"></span><span class="small muted" style="font-weight:400">verplant / Kapazität</span></h2>`;
+  for(const p of S.people){const a=A.people[p.id],f=a.avail-a.plan;
+    h+=`<div class="trow" data-act="showFree" data-id="${p.id}" title="Restkapazität von ${esc(p.name)}"><div class="nm"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}<small>${esc(p.role||'')}</small></div>
+    <div>${bar(a.plan,a.avail)}</div><div class="num">${fN(a.plan)} / ${fN(a.avail)}<br><b class="${f<-1e-9?'bad':'ok'}">${f<0?'':'+'}${fN(f)} frei</b></div></div>`;}
+  h+=`</div></div>`;
+  h+=`<div class="card"><h2>Demnächst <span class="small muted" style="font-weight:400">nächste 30 Tage</span></h2>${upcoming()}</div>`;
+  return h;
+}
+function statusTag(s){return `<span class="tag ${s==='aktiv'?'ok':s==='pausiert'?'warn':s==='abgeschlossen'?'':'info'}">${esc(PSTATUS[s]||s||'–')}</span>`;}
+function upcoming(){
+  const end=addDays(todayISO,30),L=[];
+  for(const[d,hh] of holidays(+todayISO.slice(0,4),S.settings.bl))if(d>=todayISO&&d<=end)L.push([d,'🎉',esc(hh.name)]);
+  if(end.slice(0,4)!==todayISO.slice(0,4))for(const[d,hh] of holidays(+end.slice(0,4),S.settings.bl))if(d<=end)L.push([d,'🎉',esc(hh.name)]);
+  for(const pr of S.projects)for(const m of pr.milestones||[])if(m.date>=todayISO&&m.date<=end)L.push([m.date,'◆',`Meilenstein <b>${esc(m.name)}</b> – ${pDot(pr)}${esc(pr.name)}`]);
+  for(const a of S.absences)if(a.to>=todayISO&&a.from<=end){const p=person(a.personId);if(p)L.push([maxS(a.from,todayISO),'🌴',`${esc(p.name)}: ${ABS[a.type]?.t||a.type} ${fmtDM(a.from)}–${fmtDM(a.to)} <span class="tag ${a.status==='genehmigt'?'ok':'warn'}">${a.status}</span>`]);}
+  for(const pr of S.projects){if(pr.end>=todayISO&&pr.end<=end)L.push([pr.end,'🏁',`Projektende ${pDot(pr)}${esc(pr.name)}`]);if(pr.start>=todayISO&&pr.start<=end)L.push([pr.start,'🚀',`Projektstart ${pDot(pr)}${esc(pr.name)}`]);}
+  if(!L.length)return '<div class="empty">Nichts Besonderes in den nächsten 30 Tagen.</div>';
+  return `<table>${L.sort((a,b)=>a[0]<b[0]?-1:1).map(([d,i,t])=>`<tr><td style="width:130px">${WD[wday(d)]}, ${fmtDE(d)}</td><td style="width:30px">${i}</td><td>${t}</td></tr>`).join('')}</table>`;
+}
+
+/* ---------- Restkapazität ---------- */
+const hexA=(c,a)=>/^#[0-9a-f]{6}$/i.test(c||'')?c+Math.round(Math.max(0,Math.min(1,a))*255).toString(16).padStart(2,'0'):c;
+function suggestCard(p,from,to,start,FD,mine){
+  if(!start)return '';
+  const all=projDayPlan(from,to),rows=[];
+  for(const pr of S.projects){if(pr.status==='abgeschlossen')continue;const a=maxS(start,pr.start||start),b=minS(to,pr.end||to);if(a>b)continue;
+    const open=budgetRange(pr,a,b)-sumDays(all[pr.id],a,b);let fit=0;for(const s of days(a,b))fit+=FD[s]||0;
+    const isMine=!!mine[pr.id];if(open<=1e-9&&!isMine)continue;rows.push({pr,a,b,open,fit,isMine,can:Math.max(0,Math.min(open,fit))});}
+  rows.sort((x,y)=>(y.isMine-x.isMine)||(y.can-x.can));
+  let h=`<div class="card"><h2>Was kann ${esc(p.name)} noch machen?<span class="sp"></span><span class="small muted" style="font-weight:400">ab ${fmtDE(start)} · offenes Budget vs. freie Tage in der Projektlaufzeit</span></h2>`;
+  if(!rows.length)return h+'<div class="empty">Kein Projekt mit offenem Budget im Zeitraum.</div></div>';
+  h+=`<table><tr><th>Projekt</th><th class="n">offenes Budget</th><th class="n">freie PT in Laufzeit</th><th class="n">möglich</th><th style="width:18%"></th><th></th></tr>`;
+  for(const r of rows){const at=`data-p="${p.id}" data-pr="${r.pr.id}" data-a="${r.a}" data-b="${r.b}"`;
+    h+=`<tr><td>${pDot(r.pr)}${esc(r.pr.name)} ${r.isMine?'<span class="tag info">schon dabei</span>':''}<div class="small muted">${fmtDM(r.a)} – ${fmtDE(r.b)}</div></td>
+    <td class="n ${r.open<0?'bad':''}">${fN(r.open)}</td><td class="n">${fN(r.fit)}</td><td class="n"><b class="${r.can>0?'ok':'muted'}">${fN(r.can)}</b></td><td>${bar(r.can,Math.max(r.open,0)||r.can,'var(--ok)')}</td>
+    <td class="n" style="white-space:nowrap">${r.can>0?`<button class="btn sm primary" data-act="autoFill" ${at} data-n="${r.can}" title="Füllt freie Tage ab ${fmtDM(r.a)} als vorläufige Buchungen">${fN(r.can)} PT vorschlagen</button> `:''}<button class="btn sm" data-act="rangeBookPr" ${at}>Zeitraum …</button></td></tr>`;}
+  const totalFit=Object.entries(FD).filter(([d])=>d>=start).reduce((t,[,v])=>t+v,0);
+  if(totalFit<=1e-9)h+=`<tr><td colspan="6"><div class="demobar" style="margin:8px 0 0"><span>Ab heute ist <b>${esc(p.name)}</b> im Zeitraum ${rangeLabel()} komplett verplant oder abwesend – hier passt nichts mehr hinein.</span><span class="sp"></span><button class="btn sm primary" data-act="nextPeriod">Nächsten Zeitraum ansehen ›</button></div></td></tr>`;
+  return h+`</table><p class="help" style="margin-top:8px">„Vorschlagen“ verteilt die PT auf die nächsten freien Tage von ${esc(p.name)} (innerhalb der Projektlaufzeit) – als <b>vorläufig</b> markiert, damit ihr es noch bestätigen könnt. Rückgängig mit Strg+Z.</p></div>`;
+}
+function autoFill(pid,prid,a,b,n){const p=person(pid);let left=+n,c=0;
+  for(const s of days(a,b)){if(left<=1e-9)break;const d=dayInfo(p,s),f=Math.floor(Math.max(0,d.avail-d.planSum)*100+1e-6)/100;if(f<=0)continue;const amt=Math.min(f,Math.round(left*100)/100);
+    const ex=S.allocations.find(x=>x.personId===pid&&x.projectId===prid&&x.date===s&&x.type!=='ist');
+    if(ex){ex.amount=r2(+ex.amount+amt);}else S.allocations.push({id:uid(),personId:pid,projectId:prid,date:s,amount:amt,type:'plan',tentative:true,note:'Vorschlag Restkapazität'});left-=amt;c++;}
+  save();render();toast(`${fN(n-left)} PT auf ${c} Tag(e) vorläufig verplant`,[['Rückgängig',undo]]);}
+function vFree(){
+  if(!S.people.length)return '<div class="card empty">Lege zuerst Personen unter „Team & Urlaub“ an.</div>';
+  const p=person(ui.freePerson)||S.people[0];ui.freePerson=p.id;
+  const[from,to]=curRange(),hpd=+S.settings.hoursPerDay||8;
+  const start=todayISO>to?null:maxS(todayISO,from);
+  const P={},W=[],FD={};let cap=0,plan=0,capT=0,planT=0,ov=0,freeN=0,partN=0,tentF=0;
+  for(let m=monday(from);m<=to;m=addDays(m,7))W.push({m,a:maxS(m,from),b:minS(addDays(m,6),to),cap:0,plan:0,pr:{}});
+  for(const w of W)for(const s of days(w.a,w.b)){const d=dayInfo(p,s);
+    cap+=d.avail;plan+=d.planSum;w.cap+=d.avail;w.plan+=d.planSum;w.nom=(w.nom||0)+d.base*(1-d.hf);w.abs=(w.abs||0)+d.absEff;if(d.over)ov+=d.planSum-d.avail;
+    if(start&&s>=start){capT+=d.avail;planT+=d.planSum;}
+    if(d.avail-d.planSum>1e-9){if(d.planSum<=1e-9&&d.absEff<=1e-9)freeN++;else partN++;}FD[s]=Math.max(0,d.avail-d.planSum);
+    for(const x of d.plan){if(!x.amt)continue;if(x.tent)tentF+=x.amt;const o=P[x.pid]||(P[x.pid]={rule:0,single:0,first:s,last:s});o[x.src]+=x.amt;o.last=s;w.pr[x.pid]=(w.pr[x.pid]||0)+x.amt;}}
+  const free=cap-plan,freeT=capT-planT,list=Object.entries(P).map(([pid,o])=>({pid,pr:project(pid),t:o.rule+o.single,...o})).sort((a,b)=>b.t-a.t);
+  // Kopf
+  let h=`<div class="toolbar"><label>Person <select data-chg="freePerson">${S.people.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+   <span class="muted small">${rangeLabel()} · ${fmtDE(from)} – ${fmtDE(to)} (Zeitraum oben umschalten)</span><span class="sp"></span>
+   <button class="btn primary" data-act="freeBook" data-p="${p.id}" data-d="${start||from}" data-to="${to}">Freie Tage verplanen …</button></div>`;
+  // Antwort
+  const segs=list.map(x=>`<i title="${esc(x.pr?.name)}: ${fN(x.t)} PT" style="flex:${x.t};background:${esc(x.pr?.color||'#999')}"></i>`).join('')+(free>0?`<i title="frei: ${fN(free)} PT" class="fseg" style="flex:${free}"></i>`:'');
+  h+=`<div class="card fhero"><div class="fbig"><b class="${free<0?'bad':'ok'}">${fN(free)}</b><span>PT frei</span><small>≙ ${fN(free*hpd,1)} h</small><small><span class="ok">${freeN} ganz freie</span> · <span class="muted">${partN} teilweise freie</span> Tage</small></div>
+   <div class="ftext"><p><b>${esc(p.name)}</b> hat im Zeitraum <b>${rangeLabel()}</b> <b>${fN(cap)} PT</b> Kapazität (nach Feiertagen, Urlaub, Teilzeit). Davon sind <b>${fN(plan)} PT</b> in <b>${list.length} Projekt${list.length===1?'':'en'}</b> verplant – es bleiben <b class="${free<0?'bad':'ok'}">${fN(free)} PT</b>.
+   ${tentF?` Davon <span class="tag warn tent">${fN(tentF)} PT vorläufig</span> – wenn die entfallen, wären ${fN(free+tentF)} PT frei.`:''}${start&&start>from?` Ab heute sind noch <b>${fN(freeT)} PT</b> frei.`:''}${ov>0?` <span class="tag bad">${fN(ov)} PT überbucht</span>`:''}</p>
+   <div class="stack">${segs||'<i class="fseg" style="flex:1"></i>'}</div>
+   <div class="legend" style="margin-top:8px">${list.map(x=>`<span>${pDot(x.pr)}${esc(x.pr?.code||x.pr?.name)} <b>${fN(x.t)}</b></span>`).join('')}${free>0?`<span><i class="fseg" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-right:4px;border-radius:3px"></i>frei <b>${fN(free)}</b></span>`:''}</div></div></div>`;
+  // Wochen-Zusammenfassung
+  const part=w=>w.a!==w.m||w.b!==addDays(w.m,6),fw=w=>w.cap-w.plan;
+  const absW=W.filter(w=>w.nom>0&&w.cap<=1e-9),fullW=W.filter(w=>w.cap>1e-9&&fw(w)<=1e-9),openW=W.filter(w=>w.b>=todayISO&&fw(w)>=2.5-1e-9);
+  const chip=(w,extra)=>`<span class="tag" style="margin:2px" title="${fmtDE(w.a)} – ${fmtDE(w.b)}${part(w)?' (nur teilweise im Zeitraum)':''}">KW ${isoWeek(w.a)}${part(w)?'*':''}${extra?' · '+extra:''}</span>`;
+  const hasPart=[...absW,...fullW,...openW].some(part);
+  h+=`<div class="row"><div class="card"><h2>Fest verplant <span class="tag">${fullW.length} Woche(n)</span></h2>
+    ${fullW.length?fullW.map(w=>chip(w,w.abs>1e-9?`+ ${fPT(w.abs)} T abwesend`:'')).join(''):'<span class="muted small">Keine komplett belegte Woche.</span>'}
+    ${absW.length?`<p class="small muted" style="margin:10px 0 0">Ganz abwesend (Urlaub etc.): ${absW.map(w=>chip(w)).join('')}</p>`:''}</div>
+   <div class="card"><h2>Hier ist noch Luft <span class="tag ok">${openW.length} Woche(n) ab heute mit ≥ 2,5 PT frei</span></h2>${openW.length?openW.map(w=>chip(w,fPT(fw(w))+' frei')).join(''):'<span class="muted small">Keine kommende Woche mit mindestens 2,5 freien PT in diesem Zeitraum.</span>'}
+    ${hasPart?'<p class="small muted" style="margin:10px 0 0">* Woche liegt nur teilweise im gewählten Zeitraum.</p>':''}</div></div>`;
+  h+=suggestCard(p,from,to,start,FD,P);
+  // Matrix Projekte × Wochen
+  h+=`<div class="card"><h2>Wann ist ${esc(p.name)} wo? <span class="muted small" style="font-weight:400">PT je Projekt und Kalenderwoche</span></h2>`;
+  h+=`<div class="cal" style="max-height:none"><table class="fmx"><thead><tr><th class="name">Projekt</th>${W.map(w=>`<th data-act="week" data-d="${w.a}" style="cursor:pointer" title="${fmtDE(w.a)} – ${fmtDE(w.b)}">KW ${isoWeek(w.a)}<br><span style="font-size:10px">${fmtDM(w.a)}</span></th>`).join('')}<th>Σ PT</th><th class="n">feste / einzeln</th></tr></thead><tbody>`;
+  for(const x of list){h+=`<tr><td class="name">${pDot(x.pr)}${esc(x.pr?.name||'?')}</td>${W.map(w=>{const v=w.pr[x.pid]||0;return `<td style="${v?`background:${hexA(x.pr?.color,0.15+Math.min(1,v/5)*0.6)}`:''}" title="KW ${isoWeek(w.a)}: ${fN(v)} PT">${v?fPT(v):''}</td>`;}).join('')}<td class="tot"><b>${fN(x.t)}</b></td><td class="tot small muted">${fN(x.rule)} / ${fN(x.single)}</td></tr>`;}
+  if(!list.length)h+=`<tr><td class="name muted">keine Planung</td><td colspan="${W.length+2}"></td></tr>`;
+  const rowF=(lab,fn,cls)=>`<tr class="${cls||''}"><td class="name"><b>${lab}</b></td>${W.map(fn).join('')}`;
+  h+=rowF('Verplant',w=>`<td>${fPT(w.plan)||''}</td>`,'fsum')+`<td class="tot">${fN(plan)}</td><td></td></tr>`;
+  h+=rowF('Kapazität',w=>`<td class="muted">${fPT(w.cap)}</td>`)+`<td class="tot">${fN(cap)}</td><td></td></tr>`;
+  h+=rowF('Frei',w=>{const f=w.cap-w.plan;return `<td class="ffree ${f<-1e-9?'neg':f>1e-9?'pos':'zero'}" ${f>1e-9?`data-act="freeWeek" data-p="${p.id}" data-a="${w.a}" data-b="${w.b}" style="cursor:pointer" title="Woche verplanen"`:''}>${Math.abs(f)<1e-9?'0':fPT(f)}</td>`;})+`<td class="tot ${free<0?'bad':'ok'}"><b>${fN(free)}</b></td><td></td></tr>`;
+  h+=`</tbody></table></div><p class="help" style="margin-top:8px">Je dunkler die Zelle, desto mehr PT in der Woche. Klick auf eine KW öffnet den Monatskalender.</p></div>`;
+  // Mini-Kalender freie Tage
+  h+=`<div class="card"><h2>Freie Tage im Überblick<span class="sp"></span><span class="legend"><span><i style="background:#1f9d5566"></i>ganz frei</span><span><i style="background:linear-gradient(135deg,#1f9d5555 50%,var(--we) 50%)"></i>teilweise verplant (Zahl = noch frei)</span><span><i style="background:var(--we)"></i>voll verplant / kein Arbeitstag</span><span><i style="background:var(--hol)"></i>Feiertag</span><span><i style="background:var(--abs-urlaub)"></i>Abwesend</span><span><i style="box-shadow:inset 0 0 0 2px var(--bad)"></i>überbucht</span></span></h2>
+  <table class="fcal"><tr><th>KW</th>${[1,2,3,4,5,6,0].map(d=>`<th>${WD[d]}</th>`).join('')}<th class="n">frei</th></tr>`;
+  for(const w of W){h+=`<tr><td class="muted small">KW ${isoWeek(w.a)}</td>`;
+    for(let i=0;i<7;i++){const s=addDays(w.m,i);if(s<from||s>to){h+='<td></td>';continue;}
+      const d=dayInfo(p,s),f=d.avail-d.planSum;let st='',lab='',cls='';
+      if(d.hol&&d.hf>=1&&d.base){st='background:var(--hol)';lab='F';}
+      else if(d.absl.length&&d.absEff>=d.base*(1-d.hf)-1e-9&&d.base){st=`background:var(--abs-${d.absl[0].a.type})`;lab=ABS[d.absl[0].a.type]?.s||'A';}
+      else if(!d.base){st='background:var(--we)';}
+      else if(d.over){cls='over';lab='!';}
+      else if(f>1e-9){const nom=d.base*(1-d.hf)*(p.fte??1);if(f>=nom-1e-9){st='background:#1f9d5566';cls='ffull';}else{st='background:linear-gradient(135deg,#1f9d5555 50%,var(--we) 50%)';cls='fpart';}lab=fPT(f);}
+      else{st='background:var(--we)';lab='–';}
+      const tip=[`${WD[d.w]}, ${fmtDE(s)}`,`frei: ${fN(Math.max(0,f))} PT`,...d.plan.filter(x=>x.amt).map(x=>`${project(x.pid)?.name}: ${fN(x.amt)}`),d.hol?'Feiertag: '+d.hol.name:'',...d.absl.map(x=>ABS[x.a.type]?.t)].filter(Boolean).join('\n');
+      h+=`<td class="fd ${cls} ${s===todayISO?'today':''} ${s<todayISO?'past':''}" style="${st}" data-act="day" data-p="${p.id}" data-d="${s}" title="${esc(tip)}"><span>${+s.slice(8)}.${+s.slice(5,7)}.</span><b>${lab}</b></td>`;}
+    const f=w.cap-w.plan;h+=`<td class="n ${f<-1e-9?'bad':f>1e-9?'ok':'muted'}"><b>${fN(f)}</b></td></tr>`;}
+  h+=`</table><p class="help" style="margin-top:8px">Blasse Tage liegen in der Vergangenheit. Klick auf einen Tag zum Buchen oder Ändern.</p></div>`;
+  return h;
+}
+
+/* ---------- Kalender ---------- */
+function vCal(){
+  const projOpts=`<option value="">Alle Projekte</option>`+S.projects.map(p=>`<option value="${p.id}" ${ui.filterProject===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  const persOpts=`<option value="">Alle Personen</option>`+S.people.map(p=>`<option value="${p.id}" ${ui.filterPerson===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  let h=`<div class="toolbar"><div class="seg"><button data-act="calMode" data-v="month" class="${ui.calMode==='month'?'on':''}">Monat (Tage)</button><button data-act="calMode" data-v="weeks" class="${ui.calMode==='weeks'?'on':''}">Zeitraum (Wochen)</button></div>`;
+  if(ui.calMode==='month')h+=`<button class="btn" data-act="mPrev">‹</button><b style="min-width:130px;text-align:center">${MONTHS[ui.month-1]} ${ui.year}</b><button class="btn" data-act="mNext">›</button><button class="btn sm" data-act="mToday">Heute</button>`;
+  else h+=`<b>${rangeLabel()}</b>`;
+  h+=`<select data-chg="filterProject">${projOpts}</select><select data-chg="filterPerson">${persOpts}</select><span class="sp"></span>
+  ${ui.calMode==='month'?`<button class="btn ${ui.paint.on?'primary':''}" data-act="paintToggle" title="Schnell-Erfassung: Tage per Klick oder Ziehen belegen (Taste P)">🖌 Malen</button>`:''}
+  <button class="btn" data-act="copyWeek" title="Buchungen einer Woche in Folgewochen übernehmen">⧉ Woche</button>
+  <button class="btn" data-act="undo" title="Rückgängig (Strg+Z)" ${UNDO.length?'':'disabled'}>↶</button><button class="btn" data-act="redo" title="Wiederholen (Strg+Y)" ${REDO.length?'':'disabled'}>↷</button>
+  </div>`;
+  if(ui.calMode==='month'&&ui.paint.on)h+=paintBar();
+  h+=ui.calMode==='month'?calMonth():calWeeks();
+  h+=`<div class="legend" style="margin-top:10px"><span><i style="background:var(--we)"></i>Wochenende / kein Arbeitstag</span><span><i style="background:var(--hol)"></i>Feiertag</span><span><i style="background:linear-gradient(135deg,var(--hol) 50%,transparent 50%)"></i>halber Feiertag</span>
+  ${Object.entries(ABS).map(([k,v])=>`<span><i style="background:var(--abs-${k})"></i>${v.t} (${v.s})</span>`).join('')}<span><i style="background:repeating-linear-gradient(45deg,transparent 0 3px,#999 3px 5px)"></i>beantragt</span><span><i style="box-shadow:inset 0 0 0 2px var(--bad)"></i>überbucht</span><span class="ok">✓ Ist gebucht</span><span>◆ Meilenstein</span></div>
+  <p class="help" style="margin-top:8px"><b>Klick</b> auf eine Zelle öffnet den Tag. <b>Ziehen</b> über mehrere Tage einer Person markiert einen Zeitraum (Projekt buchen, Urlaub, leeren). Mit <b>🖌 Malen</b> (Schnell-Erfassung) belegst du Tage direkt an. Gestreift = vorläufig. Tasten: <span class="kbd">←</span>/<span class="kbd">→</span> Monat, <span class="kbd">P</span> Schnell-Erfassung, <span class="kbd">Strg+Z</span> rückgängig.</p>`;
+  return h;
+}
+function paintBar(){const P=ui.paint;
+  if(!P.what||(P.what.startsWith('p:')&&!project(P.what.slice(2))))P.what=S.projects[0]?'p:'+S.projects[0].id:'a:urlaub';
+  const opts=[...S.projects.filter(x=>x.status!=='abgeschlossen'&&(!x.end||x.end>=todayISO)).map(x=>({v:'p:'+x.id,t:'Projekt: '+x.name})),{v:'a:urlaub',t:'🌴 Urlaub (ganzer Tag)'},{v:'a:urlaub:h',t:'🌴 Urlaub (½ Tag)'},{v:'a:krank',t:'Krank'},{v:'a:schulung',t:'Schulung / Konferenz'},{v:'a:gleitzeit',t:'Gleittag'},{v:'x',t:'✕ Tage leeren (Plan + Abwesenheit)'}];
+  const pr=P.what.startsWith('p:')?project(P.what.slice(2)):null;
+  return `<div class="paintbar">${pr?`<span class="dot" style="background:${esc(pr.color)};width:16px;height:16px"></span>`:''}<b>Malen mit:</b>
+  <select data-paint="what">${opts.map(o=>`<option value="${o.v}" ${o.v===P.what?'selected':''}>${esc(o.t)}</option>`).join('')}</select>
+  ${pr?`<select data-paint="amount">${AMOUNTS.filter(a=>a.v>0).map(a=>`<option value="${a.v}" ${+P.amount===a.v?'selected':''}>${a.t}</option>`).join('')}</select>
+  <label class="small"><input type="checkbox" data-paint="fill" ${P.fill?'checked':''}> nur freie Kapazität</label><label class="small"><input type="checkbox" data-paint="tent" ${P.tent?'checked':''}> vorläufig</label>`:''}
+  <span class="small muted">Klicken oder ziehen · <span class="kbd">Esc</span> beendet</span></div>`;}
+function visiblePeople(){return S.people.filter(p=>!ui.filterPerson||p.id===ui.filterPerson);}
+function msMap(){const m={};for(const pr of S.projects)for(const x of pr.milestones||[])(m[x.date]||(m[x.date]=[])).push(pr.name+': '+x.name);return m;}
+function calMonth(){
+  const[from,to]=mRange(ui.year,ui.month),ds=[...days(from,to)],H=holidays(ui.year,S.settings.bl),MS=msMap();
+  if(!S.people.length)return '<div class="card empty">Lege zuerst Personen unter „Team & Urlaub“ an.</div>';
+  let kw='<tr><th class="name"></th>',i=0;while(i<ds.length){const w=isoWeek(ds[i]);let n=0;while(i+n<ds.length&&isoWeek(ds[i+n])===w)n++;kw+=`<th colspan="${n}" style="border-right:1px solid var(--line)">KW ${w}</th>`;i+=n;}kw+='<th></th></tr>';
+  let hd='<tr><th class="name">Person</th>'+ds.map(s=>{const w=wday(s),ho=H.get(s);return `<th class="${ho?'hol':''} ${w===0||w===6?'we':''} ${s===todayISO?'today':''}" title="${ho?esc(ho.name):''}${MS[s]?'\n◆ '+esc(MS[s].join('\n◆ ')):''}">${+s.slice(8)}<br><span style="font-size:10px">${WD[w]}</span></th>`;}).join('')+'<th>Plan / Kap.</th></tr>';
+  let body='';
+  for(const p of visiblePeople()){let ap=0,ac=0;
+    body+=`<tr><td class="name" title="${esc(p.role||'')}"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}${p.bl?` <span class="muted small">${p.bl}</span>`:''}</td>`;
+    for(const s of ds){const d=dayInfo(p,s);ap+=d.planSum;ac+=d.avail;body+=cellHTML(p,d,MS[s]);}
+    body+=`<td class="tot ${ap>ac+1e-9?'bad':''}">${fN(ap)} / ${fN(ac)}</td></tr>`;}
+  // Projektzeilen
+  const pp=S.projects.filter(pr=>!ui.filterProject||pr.id===ui.filterProject);let prow='';
+  for(const pr of pp){let tot=0;const cells=ds.map(s=>{let v=0;for(const p of visiblePeople())for(const x of dayInfo(p,s).plan)if(x.pid===pr.id)v+=x.amt;tot+=v;
+      const ms=(pr.milestones||[]).filter(m=>m.date===s);
+      return `<td class="pc" style="${v?`background:${pr.color}22`:''}" title="${ms.map(m=>'◆ '+esc(m.name)).join('\n')}">${v?fPT(v):''}${ms.length?'<span style="color:'+pr.color+'">◆</span>':''}</td>`;}).join('');
+    if(tot>0||ui.filterProject)prow+=`<tr><td class="name">${pDot(pr)}${esc(pr.name)}</td>${cells}<td class="tot">${fN(tot)} PT</td></tr>`;}
+  if(prow)body+=`<tr class="sep"><td class="name" style="background:var(--bg)">Projekte (PT/Tag)</td><td colspan="${ds.length+1}"></td></tr>`+prow;
+  return `<div class="cal ${ui.paint.on?'painting':''}"><table><thead>${kw}${hd}</thead><tbody>${body}</tbody></table></div>`;
+}
+function cellHTML(p,d,ms){
+  const cls=['c'];if(!d.base)cls.push('we');if(d.hol)cls.push(d.hf>=1?'hol':'holhalf');if(d.s===todayISO)cls.push('today');
+  let lab='';
+  if(d.absl.length){const a=d.absl[0];cls.push('abs-'+a.a.type);if(a.am<1)cls.push('half');if(a.a.status!=='genehmigt')cls.push('req');lab=(ABS[a.a.type]?.s||'A')+(a.am<1?'½':'');}
+  else if(d.hol&&d.base)lab=d.hf>=1?'F':'F½';
+  if(d.over)cls.push('over');
+  const tip=[`${WD[d.w]}, ${fmtDE(d.s)} – ${p.name}`];if(d.hol)tip.push('Feiertag: '+d.hol.name);
+  for(const x of d.absl)tip.push(`${ABS[x.a.type]?.t}${x.am<1?' (halber Tag)':''} – ${x.a.status}`);
+  tip.push(`Kapazität: ${fN(d.avail)} PT`);
+  for(const x of d.plan)tip.push(`Plan ${fN(x.amt)} PT – ${project(x.pid)?.name||'?'}${x.src==='rule'?' (fest)':''}${x.tent?' (vorläufig)':''}`);
+  for(const x of d.ist)tip.push(`Ist ${fN(x.amt)} PT – ${project(x.pid)?.name||'?'}`);
+  if(ms)tip.push(...ms.map(m=>'◆ '+m));
+  if(d.over)tip.push('⚠ überbucht');
+  const chips=d.plan.filter(x=>x.amt>0).map(x=>`<i class="${ui.filterProject&&ui.filterProject!==x.pid?'fade':''} ${x.tent?'tent':''}" style="background:${esc(project(x.pid)?.color||'#999')};flex:${x.amt}"></i>`).join('');
+  const shown=ui.filterProject?d.plan.filter(x=>x.pid===ui.filterProject).reduce((t,x)=>t+x.amt,0):d.planSum;
+  return `<td class="${cls.join(' ')}" data-act="day" data-p="${p.id}" data-d="${d.s}" title="${esc(tip.join('\n'))}">${chips?`<div class="chips">${chips}</div>`:''}${shown?`<span class="v">${fPT(shown)}</span>`:''}${lab?`<span class="l">${lab}</span>`:''}${d.istSum?'<span class="ist">✓</span>':''}${ms?'<span class="ms">◆</span>':''}</td>`;
+}
+function calWeeks(){
+  const[from,to]=curRange();if(!S.people.length)return '<div class="card empty">Lege zuerst Personen an.</div>';
+  const weeks=[];for(let m=monday(from);m<=to;m=addDays(m,7))weeks.push([maxS(m,from),minS(addDays(m,6),to),m]);
+  let h=`<div class="cal"><table><thead><tr><th class="name">Person</th>${weeks.map(([a,b])=>`<th title="${fmtDE(a)} – ${fmtDE(b)}">KW ${isoWeek(a)}</th>`).join('')}<th>Σ</th></tr><tr><th class="name"></th>${weeks.map(([a])=>`<th style="font-size:10px">${fmtDM(a)}</th>`).join('')}<th></th></tr></thead><tbody>`;
+  for(const p of visiblePeople()){let tp=0,tc=0;h+=`<tr><td class="name"><span class="dot" style="background:${esc(p.color)}"></span>${esc(p.name)}</td>`;
+    for(const[a,b] of weeks){let pl=0,cp=0,abs=0;for(const s of days(a,b)){const d=dayInfo(p,s);pl+=ui.filterProject?d.plan.filter(x=>x.pid===ui.filterProject).reduce((t,x)=>t+x.amt,0):d.planSum;cp+=d.avail;abs+=d.absEff;}
+      tp+=pl;tc+=cp;const r=cp>0?pl/cp:(pl>0?2:0);
+      const bg=cp===0&&pl===0?'var(--we)':r>1.0001?'#d6454540':r>=0.85?'#d98a0033':pl>0?'#1f9d5526':'transparent';
+      h+=`<td class="wk" data-act="week" data-d="${a}" style="background:${bg}" title="${fmtDE(a)} – ${fmtDE(b)}\nPlan ${fN(pl)} / Kapazität ${fN(cp)} PT${abs?'\nAbwesend: '+fN(abs)+' T':''}">${fN(pl)}/${fN(cp)}${abs?'<br><span class="small muted">🌴'+fN(abs)+'</span>':''}</td>`;}
+    h+=`<td class="tot ${tp>tc+1e-9?'bad':''}">${fN(tp)} / ${fN(tc)}</td></tr>`;}
+  h+=`<tr class="sep"><td class="name" style="background:var(--bg)">Projekte (PT/Woche)</td><td colspan="${weeks.length+1}"></td></tr>`;
+  for(const pr of S.projects.filter(pr=>!ui.filterProject||pr.id===ui.filterProject)){let t=0;const cells=weeks.map(([a,b])=>{let v=0;for(const p of visiblePeople())for(const s of days(a,b))for(const x of dayInfo(p,s).plan)if(x.pid===pr.id)v+=x.amt;t+=v;return `<td class="pc" style="${v?`background:${pr.color}22`:''}">${v?fN(v):''}</td>`;}).join('');
+    const b=budgetRange(pr,from,to);h+=`<tr><td class="name">${pDot(pr)}${esc(pr.name)}</td>${cells}<td class="tot ${b&&t>b+1e-9?'bad':''}">${fN(t)}${b?' / '+fN(b):''}</td></tr>`;}
+  return h+'</tbody></table></div><p class="help" style="margin-top:8px">Zellen: verplant / verfügbar (PT). Grün &lt; 85 %, Gelb 85–100 %, Rot = überbucht. Klick auf eine Woche öffnet den Monat. Projektzeilen: Σ Plan / Budget.</p>';
+}
+
+/* ---------- Projekte ---------- */
+function vProj(){
+  const y=ui.year,g=ui.projGran||'Q',P=periodsOf(g,y),ya=iso(y,1,1),yb=iso(y,12,31),wa=minS(P[0].from,ya),wb=maxS(P[P.length-1].to,yb);
+  const PD=projDayPlan(wa,wb),cap={};for(const p of S.people)for(const s of days(wa,wb))cap[s]=(cap[s]||0)+dayInfo(p,s).avail;
+  const[ca,cb]=curRange(),compact=g==='W'||g==='M';
+  let h=`<div class="card"><h2>PT-Planung ${y} je Projekt<span class="sp"></span><div class="seg">${['Q','M','W'].map(k=>`<button data-act="projGran" data-v="${k}" class="${g===k?'on':''}">${{Q:'Quartale',M:'Monate',W:'Wochen'}[k]}</button>`).join('')}</div><button class="btn sm" data-act="newProject">+ Projekt</button></h2>
+  <p class="help">Zellen: Plan / Budget in PT. Budgets werden aus dem Raster des Projekts (gesamt, Jahr, Quartal, Monat oder Woche) anteilig nach Arbeitstagen auf jede Spalte umgerechnet. ${compact?'Farbe: grün = im Budget, gelb ≥ 85 %, rot = über Budget, schraffiert = außerhalb der Laufzeit.':''}</p>`;
+  if(!S.projects.length)return h+'<div class="empty">Noch keine Projekte.</div></div>'+`<div class="card"><h2>Zeitleiste ${y}</h2>${gantt(y)}</div>`;
+  h+=`<div style="overflow-x:auto"><table class="pg"><tr><th class="pn">Projekt</th>${compact?'':'<th>Budget-Raster</th>'}${P.map(p=>`<th class="${compact?'pw':''} ${p.from<=cb&&p.to>=ca&&ui.gran!=='Y'?'cur':''}" title="${fmtDE(p.from)} – ${fmtDE(p.to)}">${g==='W'?'KW<br>'+p.short:g==='M'?p.short:p.label}</th>`).join('')}<th class="n">Jahr Plan</th><th class="n">Jahr Budget</th><th class="n">Plan €</th><th></th></tr>`;
+  const TP=P.map(()=>0),TB=P.map(()=>0);let typ=0,tyb=0,te=0;
+  for(const pr of S.projects){const m=PD[pr.id];
+    const cells=P.map((p,i)=>{const pl=sumDays(m,p.from,p.to),b=budgetRange(pr,p.from,p.to);TP[i]+=pl;TB[i]+=b;const inRun=(!pr.end||p.from<=pr.end)&&(!pr.start||p.to>=pr.start);
+      if(compact){const r=b>0?pl/b:(pl>0?2:0),bg=!pl&&!b?'':r>1.0001?'#d6454533':r>=0.85?'#d98a002e':'#1f9d5526';
+        return `<td class="pw ${inRun?'':'out'} ${p.from<=cb&&p.to>=ca&&ui.gran!=='Y'?'cur':''}" style="${bg?'background:'+bg:''}" title="${esc(pr.name)} · ${p.label}: Plan ${fN(pl)} / Budget ${fN(b)} PT">${pl||b?`<b>${fN(pl,1)}</b><span class="muted">${fN(b,1)}</span>`:''}</td>`;}
+      return `<td class="${p.from<=cb&&p.to>=ca&&ui.gran!=='Y'?'cur':''}"><div class="small ${b&&pl>b+1e-9?'bad':''}">${fN(pl)} / ${fN(b)}</div>${bar(pl,b)}</td>`;}).join('');
+    const yp=sumDays(m,ya,yb),ybud=budgetRange(pr,ya,yb),r=+pr.dayRate||0;typ+=yp;tyb+=ybud;te+=yp*r;
+    h+=`<tr><td class="pn" title="${esc(pr.name)}"><b>${pDot(pr)}${esc(pr.name)}</b><div class="small muted">${esc(pr.code||'')} ${statusTag(pr.status)}${compact?` <span class="tag info">je ${GRAN[pr.budgetUnit||'Q']}</span>`:''}</div></td>${compact?'':`<td><span class="tag info">je ${GRAN[pr.budgetUnit||'Q']}</span></td>`}${cells}
+    <td class="n">${fN(yp)}</td><td class="n ${ybud&&yp>ybud+1e-9?'bad':''}">${fN(ybud)}</td><td class="n">${r?fEUR(yp*r):'–'}</td>
+    <td class="n" style="white-space:nowrap"><button class="btn sm" data-act="budget" data-id="${pr.id}">Budget</button> <button class="btn sm" data-act="editProject" data-id="${pr.id}">✎</button></td></tr>`;}
+  h+=`<tr class="sum"><td class="pn" ${compact?'':'colspan="2"'}>Summe Plan / Budget</td>${P.map((p,i)=>compact?`<td class="pw"><b>${fN(TP[i],1)}</b><span class="muted">${fN(TB[i],1)}</span></td>`:`<td class="small">${fN(TP[i])} / ${fN(TB[i])}</td>`).join('')}<td class="n">${fN(typ)}</td><td class="n">${fN(tyb)}</td><td class="n">${fEUR(te)}</td><td></td></tr>`;
+  h+=`<tr><td class="pn muted" ${compact?'':'colspan="2"'}>Kapazität · Auslastung</td>${P.map((p,i)=>{const c=sumDays(cap,p.from,p.to);return compact?`<td class="pw muted" title="Kapazität ${fN(c)} PT">${fN(c,0)}<br>${pct(TP[i],c)}%</td>`:`<td class="small muted">${fN(c)} PT · ${pct(TP[i],c)} %</td>`;}).join('')}<td class="n muted">${fN(sumDays(cap,ya,yb))}</td><td colspan="3"></td></tr></table></div></div>`;
+  h+=`<div class="card"><h2>Zeitleiste ${y}</h2>${gantt(y)}</div>`;
+  // Verteilung pro Person
+  const[from,to]=curRange(),A=aggAll(from,to);
+  if(S.projects.length&&S.people.length){
+  h+=`<div class="card"><h2>Wer arbeitet woran? – ${rangeLabel()} (Plan PT)</h2><table><tr><th>Projekt</th>${S.people.map(p=>`<th class="n">${esc(p.name)}</th>`).join('')}<th class="n">Σ</th></tr>`;
+  for(const pr of S.projects){h+=`<tr><td>${pDot(pr)}${esc(pr.name)}</td>${S.people.map(p=>{const v=A.projects[pr.id].byPerson[p.id];return `<td class="n">${v&&v.plan?fN(v.plan):'<span class="muted">–</span>'}</td>`;}).join('')}<td class="n"><b>${fN(A.projects[pr.id].plan)}</b></td></tr>`;}
+  h+=`<tr class="sum"><td>Kapazität / frei</td>${S.people.map(p=>{const a=A.people[p.id];return `<td class="n ${a.avail-a.plan<0?'bad':''}">${fN(a.avail)} / ${fN(a.avail-a.plan)}</td>`;}).join('')}<td></td></tr></table></div>`;}
+  return h;
+}
+function gantt(y){
+  const y0=iso(y,1,1),y1=iso(y,12,31),N=(toD(y1)-toD(y0))/864e5+1,pos=s=>((toD(s)-toD(y0))/864e5)/N*100;
+  const grid=[...Array(12)].map((_,m)=>`<div class="g-grid ${m%3===0?'q':''}" style="left:${pos(iso(y,m+1,1))}%"></div>`).join('')+(todayISO>=y0&&todayISO<=y1?`<div class="g-today" style="left:${pos(todayISO)}%" title="Heute"></div>`:'');
+  let h=`<div class="gantt"><div class="g-head"><div></div><div class="g-months">${MONTHS.map(m=>`<span>${m.slice(0,3)}</span>`).join('')}</div></div>`;
+  const list=S.projects.filter(p=>(!p.end||p.end>=y0)&&(!p.start||p.start<=y1));
+  if(!list.length)return h+'<div class="empty">Keine Projekte in diesem Jahr.</div></div>';
+  for(const pr of list){const a=maxS(pr.start||y0,y0),b=minS(pr.end||y1,y1);
+    h+=`<div class="g-row"><div class="gl">${pDot(pr)}${esc(pr.name)}</div><div class="g-track">${grid}<div class="g-bar" style="left:${pos(a)}%;width:${Math.max(.5,pos(b)-pos(a)+100/N)}%;background:${esc(pr.color)}" title="${fmtDE(pr.start)} – ${fmtDE(pr.end)}"></div>
+    ${(pr.milestones||[]).filter(m=>m.date>=y0&&m.date<=y1).map(m=>`<div class="g-ms" style="left:${pos(m.date)+50/N}%" title="◆ ${esc(m.name)} – ${fmtDE(m.date)}"></div>`).join('')}</div></div>`;}
+  return h+'</div>';
+}
+
+/* ---------- Buchungen ---------- */
+function vBook(){
+  let h=`<div class="card"><h2>Feste Zuordnungen (wiederkehrende Projekttage)<span class="sp"></span><button class="btn sm primary" data-act="newRule">+ Feste Zuordnung</button></h2>
+  <p class="help">Beispiel: „Clara arbeitet jeden Di + Do ganztägig an Projekt X“ oder „Montags halber Tag Weiterbildung“. Feiertage, Urlaub und halbe Tage werden automatisch abgezogen. Einzelne Tage kannst du im Kalender aussetzen (Ausnahme = 0) oder anders buchen.</p>`;
+  if(!S.rules.length)h+='<div class="empty">Keine festen Zuordnungen.</div>';else{
+  const[from,to]=curRange();
+  h+=`<table><tr><th>Person</th><th>Projekt</th><th>Wochentage</th><th class="n">Umfang/Tag</th><th>Zeitraum</th><th class="n">ergibt ${rangeLabel()}</th><th>Notiz</th><th></th></tr>`;
+  for(const r of S.rules){const p=person(r.personId);let n=0;if(p)for(const s of days(maxS(from,r.from),minS(to,r.to)))for(const x of dayInfo(p,s).plan)if(x.ref===r)n+=x.amt;
+    h+=`<tr><td>${esc(p?.name||'?')}</td><td>${pName(r.projectId)}</td><td>${[1,2,3,4,5,6,0].filter(d=>(r.weekdays||[]).includes(d)).map(d=>WD[d]).join(', ')}</td><td class="n">${fPT(r.amount)} PT</td><td class="small">${fmtDE(r.from)} – ${fmtDE(r.to)}</td><td class="n">${fN(n)} PT</td><td class="small muted">${esc(r.note||'')}</td><td class="n"><button class="btn sm" data-act="editRule" data-id="${r.id}">Bearbeiten</button></td></tr>`;}
+  h+='</table>';}
+  h+='</div>';
+  const[from,to]=curRange();
+  const list=S.allocations.filter(a=>a.date>=from&&a.date<=to&&(!ui.filterPerson||a.personId===ui.filterPerson)&&(!ui.filterProject||a.projectId===ui.filterProject)&&(!ui.bookFilter||a.type===ui.bookFilter)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  h+=`<div class="card"><h2>Einzelbuchungen – ${rangeLabel()} <span class="tag">${list.length}</span><span class="sp"></span>
+  <select data-chg="filterPerson"><option value="">Alle Personen</option>${S.people.map(p=>`<option value="${p.id}" ${ui.filterPerson===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+  <select data-chg="filterProject"><option value="">Alle Projekte</option>${S.projects.map(p=>`<option value="${p.id}" ${ui.filterProject===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+  <select data-chg="bookFilter"><option value="">Plan + Ist</option><option value="plan" ${ui.bookFilter==='plan'?'selected':''}>nur Plan</option><option value="ist" ${ui.bookFilter==='ist'?'selected':''}>nur Ist</option></select>
+  ${(()=>{const n=S.allocations.filter(a=>a.type==='plan'&&+a.amount>0&&project(a.projectId)&&!inRun(project(a.projectId),a.date)).length;return n?`<button class="btn sm danger" data-act="cleanOut" title="Plan-Buchungen vor Projektstart oder nach Projektende entfernen (Ist-Zeiten bleiben)">✕ ${n} außerhalb der Laufzeit entfernen</button>`:'';})()}
+  ${list.some(a=>a.tentative)?`<button class="btn sm" data-act="confirmAll">✓ ${list.filter(a=>a.tentative).length} vorläufige bestätigen</button>`:''}<button class="btn sm" data-act="copyWeek">⧉ Woche kopieren</button><button class="btn sm primary" data-act="newBooking">+ Buchung</button></h2>`;
+  if(!list.length)h+='<div class="empty">Keine Einzelbuchungen im Zeitraum.</div>';else{
+  let sum=0;h+=`<table><tr><th>Datum</th><th>Person</th><th>Projekt</th><th>Art</th><th class="n">PT</th><th class="n">Stunden</th><th>Notiz</th><th>Prüfung</th><th></th></tr>`;
+  for(const a of list.slice(0,800)){const p=person(a.personId);const d=p?dayInfo(p,a.date):null;sum+=+a.amount||0;
+    const chk=!d?'':(+a.amount&&d.avail<=0)?`<span class="tag bad">${d.hol?'Feiertag':d.absl.length?'abwesend':'kein Arbeitstag'}</span>`:d.over&&a.type!=='ist'?'<span class="tag bad">überbucht</span>':'';
+    h+=`<tr><td>${WD[wday(a.date)]}, ${fmtDE(a.date)}</td><td>${esc(p?.name||'?')}</td><td>${pName(a.projectId)}</td><td><span class="tag ${a.type==='ist'?'ok':'info'}">${a.type==='ist'?'Ist':+a.amount===0?'Ausnahme':'Plan'}</span>${a.tentative?' <span class="tag warn tent">vorläufig</span>':''}</td><td class="n">${fPT(a.amount)}</td><td class="n">${fN((+a.amount||0)*(+S.settings.hoursPerDay||8))}</td><td class="small muted">${esc(a.note||'')}</td><td>${chk}</td><td class="n"><button class="btn sm" data-act="editBooking" data-id="${a.id}">✎</button> <button class="btn sm danger" data-act="delBooking" data-id="${a.id}">✕</button></td></tr>`;}
+  h+=`<tr class="sum"><td colspan="4">Summe</td><td class="n">${fN(sum)}</td><td class="n">${fN(sum*(+S.settings.hoursPerDay||8))}</td><td colspan="3">${list.length>800?'(Anzeige auf 800 begrenzt)':''}</td></tr></table>`;}
+  return h+'</div>';
+}
+
+/* ---------- Team ---------- */
+function vTeam(){
+  const y=ui.year;
+  let h=`<div class="card"><h2>Team & Urlaubskonto ${y}<span class="sp"></span><button class="btn sm primary" data-act="newPerson">+ Person</button></h2>`;
+  if(!S.people.length)h+='<div class="empty">Noch keine Personen.</div>';else{
+  h+=`<table><tr><th>Name</th><th>Rolle</th><th>Bundesland</th><th>Arbeitstage</th><th class="n">FTE</th><th class="n">Anspruch</th><th class="n">+ Rest Vorjahr</th><th class="n">genommen</th><th class="n">beantragt</th><th class="n">Rest</th><th style="width:14%"></th><th></th></tr>`;
+  for(const p of S.people){const v=vacation(p,y);
+    h+=`<tr><td><span class="dot" style="background:${esc(p.color)}"></span><b>${esc(p.name)}</b></td><td>${esc(p.role||'')}</td><td>${p.bl?BL[p.bl]:'<span class="muted">Standard ('+(S.settings.bl||'bundesweit')+')</span>'}</td><td>${[1,2,3,4,5,6,0].filter(d=>(p.workdays||[]).includes(d)).map(d=>WD[d]).join(' ')}</td><td class="n">${fN(p.fte??1)}</td>
+    <td class="n">${fN(p.vacation)}</td><td class="n">${fN((p.carry||{})[y]||0)}</td><td class="n">${fN(v.taken)}</td><td class="n">${fN(v.req)}</td><td class="n ${v.rest<0?'bad':''}"><b>${fN(v.rest)}</b></td><td>${bar(v.taken+v.req,v.ent,'var(--accent)')}</td><td class="n"><button class="btn sm" data-act="editPerson" data-id="${p.id}">Bearbeiten</button></td></tr>`;}
+  h+='</table><p class="help" style="margin-top:8px">Urlaubstage werden als Arbeitstage gezählt: Wochenenden, Feiertage und Nicht-Arbeitstage (Teilzeit) zählen nicht; am 24./31.12. (halber Feiertag) kostet ein ganzer Urlaubstag nur ½ Tag.</p>';}
+  h+='</div>';
+  const list=S.absences.filter(a=>a.to>=iso(y,1,1)&&a.from<=iso(y,12,31)&&(!ui.filterPerson||a.personId===ui.filterPerson)).sort((a,b)=>a.from<b.from?-1:1);
+  h+=`<div class="card"><h2>Urlaub & Abwesenheiten ${y}<span class="sp"></span><select data-chg="filterPerson"><option value="">Alle Personen</option>${S.people.map(p=>`<option value="${p.id}" ${ui.filterPerson===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><button class="btn sm primary" data-act="newAbsence">+ Abwesenheit</button></h2>`;
+  if(!list.length)h+='<div class="empty">Keine Abwesenheiten.</div>';else{
+  h+=`<table><tr><th>Person</th><th>Art</th><th>Von</th><th>Bis</th><th>Halbe Tage</th><th class="n">Arbeitstage</th><th>Status</th><th>Notiz</th><th></th></tr>`;
+  for(const a of list){const p=person(a.personId);
+    h+=`<tr><td>${esc(p?.name||'?')}</td><td><span class="dot" style="background:var(--abs-${a.type})"></span>${ABS[a.type]?.t||a.type}</td><td>${WD[wday(a.from)]}, ${fmtDE(a.from)}</td><td>${WD[wday(a.to)]}, ${fmtDE(a.to)}</td><td class="small">${[a.halfStart?'1. Tag ½':'',a.halfEnd&&a.from!==a.to?'letzter Tag ½':''].filter(Boolean).join(', ')||'–'}</td><td class="n">${fN(absDays(a))}</td><td><span class="tag ${a.status==='genehmigt'?'ok':a.status==='abgelehnt'?'bad':'warn'}">${a.status}</span></td><td class="small muted">${esc(a.note||'')}</td>
+    <td class="n">${a.status!=='genehmigt'?`<button class="btn sm" data-act="approveAbs" data-id="${a.id}">Genehmigen</button> `:''}<button class="btn sm" data-act="editAbsence" data-id="${a.id}">✎</button></td></tr>`;}
+  h+='</table>';}
+  h+='</div>';
+  const br=bridges(y,S.settings.bl);
+  h+=`<div class="card"><h2>Brückentage ${y} (${blName(S.settings.bl)})</h2>${br.length?`<table><tr><th>Brückentag</th><th>Feiertag</th><th>Effekt</th></tr>${br.map(b=>`<tr><td>${b.bridge.split('|').map(d=>WD[wday(d)]+', '+fmtDE(d)).join(' + ')}</td><td>${WD[wday(b.hol)]}, ${fmtDE(b.hol)} – ${esc(b.name)}</td><td class="small">${b.gain}</td></tr>`).join('')}</table>`:'<div class="empty">Keine klassischen Brückentage.</div>'}
+  <p class="help" style="margin-top:8px">Tipp für die Planung: an Brückentagen ist oft das halbe Team weg – früh abfragen.</p></div>`;
+  return h;
+}
+
+/* ---------- Feiertage ---------- */
+function vHol(){
+  const y=ui.year,bl=curHolBL(),H=holidays(y,bl);
+  let h=`<div class="toolbar"><label>Bundesland <select data-chg="holBL"><option value="-" ${!bl?'selected':''}>– kein Bundesland (nur bundesweite Feiertage) –</option>${Object.entries(BL).map(([k,v])=>`<option value="${k}" ${k===bl?'selected':''}>${v}</option>`).join('')}</select></label><span class="muted small">Standard für das Team: ${blName(S.settings.bl)} (änderbar unter Einstellungen; pro Person überschreibbar)</span></div>`;
+  h+=`<div class="row"><div class="card"><h2>Feiertage ${y} – ${blName(bl)}</h2><table><tr><th>Datum</th><th>Tag</th><th>Feiertag</th><th>Art</th><th class="n">Faktor</th><th>Arbeitstag?</th></tr>`;
+  for(const[d,x] of H){const w=wday(d);h+=`<tr><td>${fmtDE(d)}</td><td>${WD[w]}</td><td>${esc(x.name)}</td><td><span class="tag ${x.kind==='gesetzlich'?'info':''}">${x.kind}</span></td><td class="n">${x.factor<1?'½':'1'}</td><td>${w===0||w===6?'<span class="muted">Wochenende</span>':'<span class="ok">fällt aus</span>'}</td></tr>`;}
+  h+=`</table><p class="help" style="margin-top:8px">Bewegliche Feiertage werden über das Osterdatum (Gauß) berechnet. Regionale Sonderfälle (z. B. Augsburger Friedensfest, Fronleichnam in Teilen Sachsens/Thüringens) bei Bedarf unten als betriebliche Feiertage ergänzen.</p></div>`;
+  h+=`<div class="card" style="max-width:560px"><h2>Arbeitstage ${y} – ${blName(bl)}</h2><table><tr><th>Zeitraum</th><th class="n">Mo–Fr</th><th class="n">Feiertage</th><th class="n">Arbeitstage</th><th class="n">Stunden</th></tr>`;
+  let tot={a:0,n:0};
+  for(let q=1;q<=4;q++){const[a,b]=qRange(y,q);let mf=0;for(const s of days(a,b)){const w=wday(s);if(w&&w<6)mf++;}const sw=stdWorkdays(a,b,bl);tot.a+=mf;tot.n+=sw.n;h+=`<tr><td><b>Q${q}</b> <span class="small muted">${fmtDM(a)}–${fmtDM(b)}</span></td><td class="n">${mf}</td><td class="n">${fN(sw.h)}</td><td class="n"><b>${fN(sw.n)}</b></td><td class="n">${fN(sw.n*(+S.settings.hoursPerDay||8))}</td></tr>`;
+    for(let m=(q-1)*3+1;m<=q*3;m++){const[ma,mb]=mRange(y,m);let mm=0;for(const s of days(ma,mb)){const w=wday(s);if(w&&w<6)mm++;}const s2=stdWorkdays(ma,mb,bl);h+=`<tr class="small muted"><td style="padding-left:20px">${MONTHS[m-1]}</td><td class="n">${mm}</td><td class="n">${fN(s2.h)}</td><td class="n">${fN(s2.n)}</td><td class="n">${fN(s2.n*(+S.settings.hoursPerDay||8))}</td></tr>`;}}
+  h+=`<tr class="sum"><td>Jahr</td><td class="n">${tot.a}</td><td class="n">${fN(tot.a-tot.n)}</td><td class="n">${fN(tot.n)}</td><td class="n">${fN(tot.n*(+S.settings.hoursPerDay||8))}</td></tr></table></div></div>`;
+  h+=`<div class="row"><div class="card"><h2>Betriebliche Feiertage / Betriebsferien<span class="sp"></span><button class="btn sm primary" data-act="newCustom">+ Eintrag</button></h2>`;
+  h+=S.custom.length?`<table><tr><th>Bezeichnung</th><th>Von</th><th>Bis</th><th>Faktor</th><th>Gilt für</th><th></th></tr>${S.custom.map(c=>`<tr><td>${esc(c.name)}</td><td>${fmtDE(c.from)}</td><td>${fmtDE(c.to||c.from)}</td><td>${+c.factor<1?'halber Tag':'ganzer Tag'}</td><td>${c.bl?BL[c.bl]:'alle'}</td><td class="n"><button class="btn sm" data-act="editCustom" data-id="${c.id}">✎</button></td></tr>`).join('')}</table>`:'<div class="empty">Keine Einträge. Beispiel: Betriebsferien 27.–30.12. oder Betriebsausflug als halber Tag.</div>';
+  h+=`<p class="help" style="margin-top:8px">24.12. und 31.12. als halbe Tage steuerst du unter Einstellungen.</p></div>`;
+  h+=`<div class="card" style="max-width:560px"><h2>Arbeitstage-Rechner</h2><div class="toolbar"><label>Von <input type="date" id="rcFrom" value="${iso(y,1,1)}"></label><label>Bis <input type="date" id="rcTo" value="${iso(y,12,31)}"></label><button class="btn primary" data-act="calcRange">Berechnen</button></div><div id="rcOut" class="muted">Zeitraum wählen – berücksichtigt Bundesland ${blName(bl)} und halbe Tage.</div></div></div>`;
+  return h;
+}
+
+/* ---------- Daten ---------- */
+function vData(){
+  const s=S.settings;
+  return `<div class="row"><div class="card"><h2>Einstellungen</h2><form id="setForm" class="grid2">
+   <div class="fld"><span>Team / Bezeichnung</span><input name="teamName" value="${esc(s.teamName)}"></div>
+   <div class="fld"><span>Standard-Bundesland (Feiertage)</span><select name="bl"><option value="" ${!s.bl?'selected':''}>– kein Bundesland (nur bundesweite Feiertage) –</option>${Object.entries(BL).map(([k,v])=>`<option value="${k}" ${k===s.bl?'selected':''}>${v}</option>`).join('')}</select></div>
+   <div class="fld"><span>Stunden pro Personentag</span><input type="number" step="0.25" min="1" name="hoursPerDay" value="${esc(s.hoursPerDay)}"></div>
+   <div class="fld"><span>Abwesenheiten reduzieren Kapazität</span><select name="absReduces"><option value="alle" ${s.absReduces==='alle'?'selected':''}>alle (auch beantragte)</option><option value="genehmigt" ${s.absReduces==='genehmigt'?'selected':''}>nur genehmigte</option></select></div>
+   <label class="fld cb"><input type="checkbox" name="halfXmas" ${s.halfXmas?'checked':''}> 24.12. ist halber Arbeitstag</label>
+   <label class="fld cb"><input type="checkbox" name="halfNye" ${s.halfNye?'checked':''}> 31.12. ist halber Arbeitstag</label>
+   <div class="full actions"><span class="sp"></span><button class="btn primary">Einstellungen speichern</button></div></form></div>
+  <div class="card"><h2>Daten</h2><p class="help">Alles wird lokal im Browser gespeichert (localStorage dieser Datei). Für Backups oder Weitergabe exportieren.</p>
+   <div class="toolbar"><button class="btn primary" data-act="exportJSON">Export JSON (Backup)</button><button class="btn" data-act="importJSON">Import JSON</button></div>
+   <div class="toolbar"><button class="btn" data-act="exportCSV">CSV: Tagesplanung ${ui.year}</button><button class="btn" data-act="exportCSVq" data-v="Q">CSV: Quartale ${ui.year}</button><button class="btn" data-act="exportCSVq" data-v="M">CSV: Monate</button><button class="btn" data-act="exportCSVq" data-v="W">CSV: Wochen</button><button class="btn" data-act="exportICS">Kalender (.ics) ${ui.year}</button></div>
+   <div class="toolbar"><button class="btn" data-act="loadDemo">🧪 Demo starten</button><button class="btn danger" data-act="clearAll">Alles löschen</button></div>
+   <p class="help">Stand: ${S.people.length} Personen · ${S.projects.length} Projekte · ${S.rules.length} feste Zuordnungen · ${S.allocations.length} Einzelbuchungen · ${S.absences.length} Abwesenheiten</p></div></div>
+  <div class="card"><h2>Über PT-Planer</h2><table style="width:auto">
+   <tr><td class="muted">Version</td><td><b>${APP.version}</b> <span class="muted small">· Stand ${fmtDE(APP.date)}</span></td></tr>
+   <tr><td class="muted">Projektseite</td><td><a href="${APP.repo}" target="_blank" rel="noopener">${APP.repo.replace('https://','')}</a></td></tr>
+   <tr><td class="muted">Neue Versionen</td><td><a href="${APP.repo}/releases" target="_blank" rel="noopener">Releases auf GitHub</a></td></tr>
+   <tr><td class="muted">Fehler / Ideen</td><td><a href="${APP.repo}/issues" target="_blank" rel="noopener">Issue anlegen</a></td></tr>
+   <tr><td class="muted">Lizenz</td><td>${APP.license}</td></tr></table>
+   <p class="help" style="margin:8px 0 0">Backups (JSON) enthalten die Version, mit der sie exportiert wurden.</p></div>
+  <div class="card"><h2>So rechnet der Planer</h2><ul class="small" style="margin:0;padding-left:18px;line-height:1.7">
+   <li><b>Kapazität pro Tag</b> = Arbeitstag der Person (1/0) × (1 − Feiertagsfaktor) − Abwesenheit, × FTE. Halbe Feiertage (24./31.12.) und halbe Urlaubstage ergeben ½.</li>
+   <li><b>Plan</b> = Einzelbuchungen (Typ Plan) + feste Zuordnungen. Feste Zuordnungen füllen nur die freie Kapazität und überspringen Feiertage/Urlaub automatisch. Eine Einzelbuchung desselben Projekts am selben Tag ersetzt die feste Zuordnung (0 = Tag aussetzen).</li>
+   <li><b>Ist</b> = Einzelbuchungen vom Typ Ist (Zeiterfassung), getrennt vom Plan ausgewertet.</li>
+   <li><b>Budget</b> pflegst du je Projekt in einem Raster deiner Wahl (gesamt, Jahr, Quartal, Monat, Woche). Für jeden anderen Zeitraum wird es anteilig nach Arbeitstagen umgerechnet – ein Quartalsbudget von 60 PT ergibt also z. B. für einen Monat mit 21 von 63 Arbeitstagen 20 PT. Kosten = PT × Tagessatz.</li>
+   <li><b>Überbuchung</b> = Plan &gt; Kapazität an einem Tag (rote Umrandung im Kalender).</li></ul></div>`;
+}
+
+/* ====================== Modal & Formulare ====================== */
+function openModal(t,html){document.getElementById('mtitle').textContent=t;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.remove('hidden');}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function formModal(o){
+  const v=o.values||{};let h='<form id="mform" class="grid2">';
+  for(const f of o.fields){
+    if(f.type==='html'){h+=`<div class="full">${f.html}</div>`;continue;}
+    const val=v[f.key]??f.def??'';
+    if(f.type==='checkbox'){h+=`<label class="fld cb ${f.full?'full':''}"><input type="checkbox" name="${f.key}" ${val?'checked':''}> ${esc(f.label)}</label>`;continue;}
+    h+=`<div class="fld ${f.full?'full':''}"><span>${esc(f.label)}</span>`;
+    if(f.type==='select')h+=`<select name="${f.key}">${f.options.map(op=>`<option value="${esc(op.v)}" ${String(op.v)===String(val)?'selected':''}>${esc(op.t)}</option>`).join('')}</select>`;
+    else if(f.type==='weekdays')h+=`<div class="wds">${[1,2,3,4,5,6,0].map(d=>`<label><input type="checkbox" name="${f.key}" value="${d}" ${(val||[]).includes(d)?'checked':''}>${WD[d]}</label>`).join('')}</div>`;
+    else if(f.type==='textarea')h+=`<textarea name="${f.key}" rows="${f.rows||3}" placeholder="${esc(f.ph||'')}">${esc(val)}</textarea>`;
+    else h+=`<input type="${f.type||'text'}" name="${f.key}" value="${esc(val)}" ${f.step?`step="${f.step}"`:''} ${f.min!=null?`min="${f.min}"`:''} ${f.max!=null?`max="${f.max}"`:''} ${f.req?'required':''} placeholder="${esc(f.ph||'')}">`;
+    if(f.hint)h+=`<small>${esc(f.hint)}</small>`;h+='</div>';}
+  h+=`<div class="full actions">${o.onDelete?'<button type="button" class="btn danger" id="mdel">Löschen</button>':''}<span class="sp"></span><button type="button" class="btn" data-close>Abbrechen</button><button class="btn primary">Speichern</button></div></form>`;
+  openModal(o.title,h);
+  const fm=document.getElementById('mform');
+  fm.onsubmit=e=>{e.preventDefault();const out={};
+    for(const f of o.fields){if(!f.key)continue;
+      if(f.type==='weekdays')out[f.key]=[...fm.querySelectorAll(`input[name="${f.key}"]:checked`)].map(x=>+x.value);
+      else if(f.type==='checkbox')out[f.key]=fm.elements[f.key].checked;
+      else if(f.type==='number'){const x=fm.elements[f.key].value;out[f.key]=x===''?null:parseFloat(x);}
+      else out[f.key]=fm.elements[f.key].value.trim();}
+    const err=o.onSave(out);if(err){alert(err);return;}closeModal();save();render();};
+  if(o.onDelete)document.getElementById('mdel').onclick=()=>{if(confirm(o.delConfirm||'Wirklich löschen?')){o.onDelete();closeModal();save();render();}};
+}
+const optPeople=()=>S.people.map(p=>({v:p.id,t:p.name}));
+const inRun=(pr,s)=>!!pr&&(!pr.start||s>=pr.start)&&(!pr.end||s<=pr.end);
+const runTxt=pr=>`${fmtDE(pr.start)||'offen'} – ${fmtDE(pr.end)||'offen'}`;
+const optProjects=()=>S.projects.map(p=>({v:p.id,t:p.name+(p.status==='abgeschlossen'?' (abgeschlossen)':'')}));
+
+function projectForm(pr){
+  const y=ui.year,isNew=!pr;pr=pr||{color:PALETTE[S.projects.length%PALETTE.length],status:'aktiv',start:iso(y,1,1),end:iso(y,12,31),budget:{},milestones:[]};
+  const vals={...pr,ms:(pr.milestones||[]).map(m=>m.date+' '+m.name).join('\n')};
+  formModal({title:isNew?'Neues Projekt':'Projekt bearbeiten',values:vals,fields:[
+    {key:'name',label:'Projektname',req:1,full:1},{key:'code',label:'Kürzel / Projektnummer'},{key:'client',label:'Kunde / Auftraggeber'},
+    {key:'status',label:'Status',type:'select',options:Object.keys(PSTATUS).map(k=>({v:k,t:PSTATUS[k]}))},{key:'color',label:'Farbe',type:'color'},
+    {key:'start',label:'Start',type:'date'},{key:'end',label:'Ende',type:'date'},
+    {key:'dayRate',label:'Tagessatz (€ / PT)',type:'number',step:1,min:0,hint:'optional, für Kostenberechnung'},
+    {type:'html',html:isNew?'<div class="help" style="margin:22px 0 0">Das PT-Budget legst du direkt nach dem Speichern fest – wahlweise gesamt, je Jahr, Quartal, Monat oder Woche.</div>':`<div class="fld"><span>PT-Budget</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag info">je ${GRAN[pr.budgetUnit||'Q']}</span><span class="small">${y}: <b>${fN(budgetRange(pr,iso(y,1,1),iso(y,12,31)))} PT</b></span><button type="button" class="btn sm" data-act="budget" data-id="${pr.id}" title="Ungespeicherte Änderungen in diesem Formular gehen dabei verloren">Budget pflegen …</button></div></div>`},
+    {key:'ms',label:'Meilensteine (je Zeile: JJJJ-MM-TT Bezeichnung)',type:'textarea',full:1,ph:`${y}-03-31 Zwischenbericht`},
+    {key:'note',label:'Notiz',type:'textarea',full:1,rows:2}],
+    onSave:o=>{if(!o.name)return 'Bitte einen Projektnamen angeben.';if(o.start&&o.end&&o.end<o.start)return 'Ende liegt vor dem Start.';
+      const ms=[];for(const line of (o.ms||'').split('\n')){const m=line.trim().match(/^(\d{4}-\d{2}-\d{2})\s+(.+)$/);if(m)ms.push({date:m[1],name:m[2]});else if(line.trim())return 'Meilenstein-Zeile nicht erkannt: '+line;}
+      const t=isNew?{id:uid(),budget:{}}:pr;Object.assign(t,{name:o.name,code:o.code,client:o.client,status:o.status,color:o.color,start:o.start,end:o.end,dayRate:o.dayRate,note:o.note,milestones:ms});
+      t.budget=t.budget||{};if(isNew){t.budgetUnit='Q';S.projects.push(t);setTimeout(()=>budgetModal(t),0);}},
+    onDelete:isNew?null:()=>{S.projects=S.projects.filter(x=>x!==pr);S.allocations=S.allocations.filter(a=>a.projectId!==pr.id);S.rules=S.rules.filter(r=>r.projectId!==pr.id);},
+    delConfirm:'Projekt inkl. aller Buchungen und festen Zuordnungen löschen?'});
+}
+function personForm(p){
+  const y=ui.year,isNew=!p;p=p||{color:PALETTE[(S.people.length+3)%PALETTE.length],workdays:[1,2,3,4,5],fte:1,vacation:30,bl:'',carry:{}};
+  formModal({title:isNew?'Neue Person':'Person bearbeiten',values:{...p,carryY:(p.carry||{})[y]??0},fields:[
+    {key:'name',label:'Name',req:1},{key:'role',label:'Rolle'},
+    {key:'bl',label:'Bundesland (Feiertage)',type:'select',options:[{v:'',t:'Standard ('+blName(S.settings.bl)+')'},...Object.entries(BL).map(([k,v])=>({v:k,t:v}))]},{key:'color',label:'Farbe',type:'color'},
+    {key:'workdays',label:'Arbeitstage',type:'weekdays',full:1},
+    {key:'fte',label:'Arbeitszeitfaktor (FTE)',type:'number',step:0.05,min:0,max:1,hint:'1 = voller Tag; 0,8 = 80 % je Arbeitstag'},
+    {key:'vacation',label:'Urlaubsanspruch / Jahr (Tage)',type:'number',step:0.5,min:0},
+    {key:'carryY',label:`Resturlaub aus Vorjahr für ${y}`,type:'number',step:0.5,min:0}],
+    onSave:o=>{if(!o.name)return 'Bitte Namen angeben.';if(!o.workdays.length)return 'Mindestens einen Arbeitstag wählen.';
+      const t=isNew?{id:uid(),carry:{}}:p;Object.assign(t,{name:o.name,role:o.role,bl:o.bl,color:o.color,workdays:o.workdays,fte:o.fte??1,vacation:o.vacation??0});t.carry=t.carry||{};t.carry[y]=o.carryY||0;if(isNew)S.people.push(t);},
+    onDelete:isNew?null:()=>{S.people=S.people.filter(x=>x!==p);S.allocations=S.allocations.filter(a=>a.personId!==p.id);S.rules=S.rules.filter(r=>r.personId!==p.id);S.absences=S.absences.filter(a=>a.personId!==p.id);},
+    delConfirm:'Person inkl. Buchungen, festen Zuordnungen und Abwesenheiten löschen?'});
+}
+function ruleForm(r,preset){
+  if(!S.people.length||!S.projects.length)return alert('Bitte zuerst Personen und Projekte anlegen.');
+  const isNew=!r;const pr0=project(preset?.projectId)||S.projects[0];
+  r=r||{personId:preset?.personId||S.people[0].id,projectId:pr0.id,weekdays:[2,4],amount:1,from:maxS(pr0.start||iso(ui.year,1,1),iso(ui.year,1,1)),to:pr0.end||iso(ui.year,12,31)};
+  formModal({title:isNew?'Feste Zuordnung':'Feste Zuordnung bearbeiten',values:r,fields:[
+    {key:'personId',label:'Person',type:'select',options:optPeople()},{key:'projectId',label:'Projekt',type:'select',options:optProjects()},
+    {key:'weekdays',label:'Feste Wochentage',type:'weekdays',full:1},
+    {key:'amount',label:'Umfang je Tag',type:'select',options:AMOUNTS.filter(a=>a.v>0)},
+    {type:'html',html:''},
+    {key:'from',label:'Gültig ab',type:'date',req:1},{key:'to',label:'Gültig bis',type:'date',req:1},
+    {key:'note',label:'Notiz',full:1}],
+    onSave:o=>{if(!o.weekdays.length)return 'Mindestens einen Wochentag wählen.';if(!o.from||!o.to||o.to<o.from)return 'Zeitraum prüfen.';
+      const t=isNew?{id:uid()}:r;Object.assign(t,{personId:o.personId,projectId:o.projectId,weekdays:o.weekdays,amount:+o.amount,from:o.from,to:o.to,note:o.note});if(isNew)S.rules.push(t);},
+    onDelete:isNew?null:()=>{S.rules=S.rules.filter(x=>x!==r);}});
+}
+function bookingForm(a,preset){
+  if(!S.people.length||!S.projects.length)return alert('Bitte zuerst Personen und Projekte anlegen.');
+  const isNew=!a;const v=a?{...a}:{personId:preset?.personId||ui.filterPerson||S.people[0].id,projectId:preset?.projectId||ui.filterProject||S.projects[0].id,date:preset?.date||todayISO,to:preset?.to||preset?.date||todayISO,amount:1,type:preset?.type||'plan',skip:true,fill:!!preset?.fill};
+  const fields=[{key:'personId',label:'Person',type:'select',options:optPeople()},{key:'projectId',label:'Projekt',type:'select',options:optProjects()}];
+  if(isNew)fields.push({key:'date',label:'Von',type:'date',req:1},{key:'to',label:'Bis (für mehrere Tage)',type:'date'});else fields.push({key:'date',label:'Datum',type:'date',req:1},{type:'html',html:''});
+  fields.push({key:'amount',label:'Umfang',type:'select',options:AMOUNTS},{key:'type',label:'Art',type:'select',options:[{v:'plan',t:'Plan'},{v:'ist',t:'Ist (erfasste Zeit)'}]});
+  if(isNew)fields.push({key:'skip',label:'Nur verfügbare Arbeitstage buchen (Wochenende, Feiertage, Urlaub überspringen)',type:'checkbox',full:1},{key:'fill',label:'Nur freie Restkapazität buchen (Umfang wird gekürzt, wenn der Tag schon durch andere Projekte belegt ist – keine Überbuchung)',type:'checkbox',full:1});
+  fields.push({key:'tentative',label:'Vorläufig (Option / Angebot, noch nicht bestätigt)',type:'checkbox',full:1},{key:'note',label:'Notiz',full:1});
+  formModal({title:isNew?'Neue Buchung':'Buchung bearbeiten',values:v,fields,
+    onSave:o=>{if(!o.date)return 'Datum fehlt.';const prj=project(o.projectId);
+      if(!isNew&&o.type==='plan'&&+o.amount>0&&!inRun(prj,o.date))return `${fmtDE(o.date)} liegt außerhalb der Laufzeit von „${prj.name}“ (${runTxt(prj)}). Bitte Datum oder Laufzeit anpassen.`;
+      if(!isNew){Object.assign(a,{personId:o.personId,projectId:o.projectId,date:o.date,amount:+o.amount,type:o.type,note:o.note,tentative:o.type==='plan'&&o.tentative});return;}
+      const to=o.to||o.date;if(to<o.date)return '„Bis“ liegt vor „Von“.';
+      const p=person(o.personId);let n=0,out=0;
+      for(const s of days(o.date,to)){if(o.type==='plan'&&+o.amount>0&&!inRun(prj,s)){out++;continue;}const d=dayInfo(p,s);if(o.skip&&+o.amount>0&&d.avail<=0)continue;
+        let amt=+o.amount;if(o.fill&&o.type==='plan'&&amt>0){const free=d.avail-d.plan.filter(x=>x.pid!==o.projectId).reduce((t,x)=>t+x.amt,0);amt=Math.min(amt,Math.floor(Math.max(0,free)*100+1e-6)/100);if(amt<=0)continue;}
+        S.allocations=S.allocations.filter(x=>!(x.personId===o.personId&&x.projectId===o.projectId&&x.date===s&&x.type===o.type));
+        S.allocations.push({id:uid(),personId:o.personId,projectId:o.projectId,date:s,amount:amt,type:o.type,note:o.note,tentative:o.type==='plan'&&o.tentative});n++;}
+      if(!n)return out?`Der Zeitraum liegt außerhalb der Laufzeit von „${prj.name}“ (${runTxt(prj)}).`:o.fill?'Im Zeitraum ist keine freie Restkapazität mehr vorhanden.':'Im Zeitraum gibt es keine verfügbaren Arbeitstage.';
+      if(out)toast(`${n} Tag(e) gebucht – ${out} Tag(e) außerhalb der Projektlaufzeit (${runTxt(prj)}) übersprungen`);},
+    onDelete:isNew?null:()=>{S.allocations=S.allocations.filter(x=>x!==a);}});
+}
+function absenceForm(a,preset){
+  if(!S.people.length)return alert('Bitte zuerst Personen anlegen.');
+  const isNew=!a;const v=a?{...a}:{personId:preset?.personId||ui.filterPerson||S.people[0].id,type:preset?.type||'urlaub',from:preset?.date||todayISO,to:preset?.to||preset?.date||todayISO,halfStart:!!preset?.half,halfEnd:false,status:'genehmigt'};
+  formModal({title:isNew?'Neue Abwesenheit':'Abwesenheit bearbeiten',values:v,fields:[
+    {key:'personId',label:'Person',type:'select',options:optPeople()},{key:'type',label:'Art',type:'select',options:Object.entries(ABS).map(([k,x])=>({v:k,t:x.t}))},
+    {key:'from',label:'Von',type:'date',req:1},{key:'to',label:'Bis',type:'date',req:1},
+    {key:'halfStart',label:'Erster Tag nur halb (bei 1 Tag: halber Tag)',type:'checkbox'},{key:'halfEnd',label:'Letzter Tag nur halb',type:'checkbox'},
+    {key:'status',label:'Status',type:'select',options:[{v:'beantragt',t:'beantragt'},{v:'genehmigt',t:'genehmigt'},{v:'abgelehnt',t:'abgelehnt'}]},
+    {key:'note',label:'Notiz / Vertretung'}],
+    onSave:o=>{if(!o.from||!o.to||o.to<o.from)return 'Zeitraum prüfen.';const t=isNew?{id:uid()}:a;Object.assign(t,o);if(isNew)S.absences.push(t);},
+    onDelete:isNew?null:()=>{S.absences=S.absences.filter(x=>x!==a);}});
+}
+function customForm(c){
+  const isNew=!c;c=c||{name:'Betriebsferien',from:iso(ui.year,12,27),to:iso(ui.year,12,30),factor:1,bl:''};
+  formModal({title:isNew?'Betrieblicher Feiertag':'Bearbeiten',values:c,fields:[
+    {key:'name',label:'Bezeichnung',req:1,full:1},{key:'from',label:'Von',type:'date',req:1},{key:'to',label:'Bis',type:'date'},
+    {key:'factor',label:'Umfang',type:'select',options:[{v:1,t:'ganzer Tag frei'},{v:0.5,t:'halber Tag frei'}]},
+    {key:'bl',label:'Gilt für',type:'select',options:[{v:'',t:'alle Bundesländer'},...Object.entries(BL).map(([k,v])=>({v:k,t:v}))]}],
+    onSave:o=>{if(!o.name||!o.from)return 'Bezeichnung und Datum angeben.';if(o.to&&o.to<o.from)return 'Zeitraum prüfen.';const t=isNew?{id:uid()}:c;Object.assign(t,o,{factor:+o.factor,to:o.to||o.from});if(isNew)S.custom.push(t);},
+    onDelete:isNew?null:()=>{S.custom=S.custom.filter(x=>x!==c);}});
+}
+function dayModal(pid,s){
+  const p=person(pid),d=dayInfo(p,s);
+  let h=`<p style="margin-top:0"><b>${esc(p.name)}</b> · ${WD[d.w]}, ${fmtDE(s)} · KW ${isoWeek(s)}<br>
+  ${d.hol?`<span class="tag warn">Feiertag: ${esc(d.hol.name)}</span> `:''}${!d.base?'<span class="tag">kein Arbeitstag</span> ':''}${d.absl.map(x=>`<span class="tag info">${ABS[x.a.type]?.t}${x.am<1?' ½':''} · ${x.a.status}</span>`).join(' ')}
+  <br><span class="muted">Kapazität ${fN(d.avail)} PT · verplant ${fN(d.planSum)} PT · Ist ${fN(d.istSum)} PT</span> ${d.over?'<span class="tag bad">überbucht</span>':''}</p>`;
+  const rows=[...d.plan.map(x=>({...x,k:'Plan'})),...d.ist.map(x=>({...x,k:'Ist'}))];
+  const zero=(IDX.single.get(pid+'|'+s)||[]).filter(a=>a.type!=='ist'&&!(+a.amount));
+  h+='<table><tr><th>Projekt</th><th>Art</th><th class="n">PT</th><th>Quelle</th><th></th></tr>';
+  if(!rows.length&&!zero.length)h+='<tr><td colspan="5" class="muted">Keine Buchungen an diesem Tag.</td></tr>';
+  for(const x of rows)if(x.amt>0||x.src==='single')h+=`<tr><td>${pName(x.pid)}</td><td>${x.k}${x.src==='single'&&!x.amt?' (Ausnahme)':''}${x.tent?' <span class="tag warn">vorläufig</span>':''}</td><td class="n">${fPT(x.amt)}</td><td>${x.src==='rule'?'feste Zuordnung':'Einzelbuchung'}</td><td class="n">${x.src==='rule'?`<button class="btn sm" data-act="ruleSkip" data-r="${x.ref.id}" data-p="${pid}" data-d="${s}">Aussetzen</button> <button class="btn sm" data-act="ruleHalf" data-r="${x.ref.id}" data-p="${pid}" data-d="${s}">Nur ½</button>`:`${x.tent?`<button class="btn sm" data-act="confirmBooking" data-id="${x.ref.id}" data-reday="${pid}|${s}">✓ bestätigen</button> `:''}<button class="btn sm" data-act="editBooking" data-id="${x.ref.id}">✎</button> <button class="btn sm danger" data-act="delBooking" data-id="${x.ref.id}" data-reday="${pid}|${s}">✕</button>`}</td></tr>`;
+  h+='</table>';
+  h+=`<div class="toolbar" style="margin-top:14px"><button class="btn primary" data-act="dayBook" data-p="${pid}" data-d="${s}" data-t="plan">+ Plan</button><button class="btn" data-act="dayBook" data-p="${pid}" data-d="${s}" data-t="ist">+ Ist erfassen</button>
+  <button class="btn" data-act="dayVac" data-p="${pid}" data-d="${s}" data-h="0">🌴 Urlaub (ganz)</button><button class="btn" data-act="dayVac" data-p="${pid}" data-d="${s}" data-h="1">🌴 Urlaub (½)</button><button class="btn" data-act="dayAbs" data-p="${pid}" data-d="${s}">Abwesenheit …</button><button class="btn" data-act="copyWeek" data-p="${pid}" data-d="${s}">⧉ Diese Woche fortschreiben …</button></div>`;
+  if(d.absl.length)h+=`<div class="toolbar">${d.absl.map(x=>`<button class="btn sm" data-act="editAbsence" data-id="${x.a.id}">${ABS[x.a.type]?.t} ${fmtDM(x.a.from)}–${fmtDM(x.a.to)} bearbeiten</button>`).join('')}</div>`;
+  openModal('Tag bearbeiten',h);
+}
+
+/* ====================== Export ====================== */
+function download(name,content,type){const b=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+const csvC=v=>{v=String(v??'');return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+const dec=n=>String(Math.round((+n||0)*100)/100).replace('.',',');
+function exportCSV(){const y=ui.year,L=[['Datum','KW','Wochentag','Person','Projekt','Art','PT','Stunden','Quelle','Kapazität PT','Feiertag','Abwesenheit']];
+  for(const p of S.people)for(const s of days(iso(y,1,1),iso(y,12,31))){const d=dayInfo(p,s);const base=[s,isoWeek(s),WD[d.w],p.name];
+    const extra=[dec(d.avail),d.hol?d.hol.name:'',d.absl.map(x=>ABS[x.a.type]?.t+(x.am<1?' ½':'')).join(', ')];
+    for(const x of d.plan)if(x.amt)L.push([...base,project(x.pid)?.name,'Plan',dec(x.amt),dec(x.amt*S.settings.hoursPerDay),x.src==='rule'?'fest':'einzeln',...extra]);
+    for(const x of d.ist)L.push([...base,project(x.pid)?.name,'Ist',dec(x.amt),dec(x.amt*S.settings.hoursPerDay),'einzeln',...extra]);}
+  download(`pt-planung-${y}.csv`,'\ufeff'+L.map(r=>r.map(csvC).join(';')).join('\r\n'),'text/csv');}
+function exportCSVq(g){const y=ui.year,P=periodsOf(g,y),PD=projDayPlan(minS(P[0].from,iso(y,1,1)),maxS(P[P.length-1].to,iso(y,12,31)));
+  const L=[['Projekt','Kürzel','Status','Budget-Raster','Tagessatz',...P.flatMap(p=>[p.label+' Budget',p.label+' Plan']),'Jahr Budget','Jahr Plan']];
+  for(const pr of S.projects){const m=PD[pr.id];L.push([pr.name,pr.code,pr.status,GRAN[pr.budgetUnit||'Q'],dec(pr.dayRate),...P.flatMap(p=>[dec(budgetRange(pr,p.from,p.to)),dec(sumDays(m,p.from,p.to))]),dec(budgetRange(pr,iso(y,1,1),iso(y,12,31))),dec(sumDays(m,iso(y,1,1),iso(y,12,31)))]);}
+  download(`pt-${{Q:'quartale',M:'monate',W:'wochen'}[g]}-${y}.csv`,'﻿'+L.map(r=>r.map(csvC).join(';')).join('\r\n'),'text/csv');}
+function exportICS(){const y=ui.year,ev=[],D=s=>s.replace(/-/g,''),st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const add=(a,b,t)=>ev.push(['BEGIN:VEVENT','UID:'+uid()+'@pt-planer','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+D(a),'DTEND;VALUE=DATE:'+D(addDays(b,1)),'SUMMARY:'+t.replace(/[,;]/g,'\\$&'),'TRANSP:TRANSPARENT','END:VEVENT'].join('\r\n'));
+  for(const[d,h] of holidays(y,S.settings.bl))add(d,d,'Feiertag: '+h.name);
+  for(const a of S.absences)if(a.to>=iso(y,1,1)&&a.from<=iso(y,12,31))add(a.from,a.to,`${person(a.personId)?.name}: ${ABS[a.type]?.t} (${a.status})`);
+  for(const pr of S.projects)for(const m of pr.milestones||[])if(m.date.startsWith(String(y)))add(m.date,m.date,`◆ ${pr.name}: ${m.name}`);
+  download(`pt-planer-${y}.ics`,['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//PT-Planer//DE','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n'),'text/calendar');}
+
+function syncMonth(){const[a]=curRange();if(ui.gran!=='Y')ui.month=ui.gran==='W'?+addDays(a,3).slice(5,7):+a.slice(5,7);if(ui.gran==='W')ui.year=+addDays(a,3).slice(0,4)===ui.year?ui.year:ui.year;}
+function syncFromMonth(){if(ui.gran==='M')ui.pv=ui.month;else if(ui.gran==='Q')ui.pv=Math.floor((ui.month-1)/3)+1;else if(ui.gran==='W')ui.pv=isoWeek(iso(ui.year,ui.month,7));}
+function stepPeriod(d){if(ui.gran==='Y'){ui.year+=d;}else{ui.pv+=d;if(ui.pv<1){ui.year--;ui.pv=gMax(ui.gran,ui.year);}else if(ui.pv>gMax(ui.gran,ui.year)){ui.year++;ui.pv=1;}}syncMonth();render();}
+document.getElementById('pPrev').onclick=()=>stepPeriod(-1);
+document.getElementById('btnPal').onclick=()=>palette();
+document.getElementById('btnDemo').onclick=()=>setDemo(!ui.demo);
+document.getElementById('pNext').onclick=()=>stepPeriod(1);
+document.getElementById('pNow').onclick=()=>{ui.year=ui.gran==='W'?(()=>{const t=toD(todayISO);t.setUTCDate(t.getUTCDate()+3-(t.getUTCDay()+6)%7);return t.getUTCFullYear();})():now.getFullYear();ui.pv=curOf(ui.gran);syncMonth();render();};
+
+/* ---------- Budget-Editor (Gesamt / Jahr / Quartal / Monat / Woche) ---------- */
+let BM=null;
+function budgetModal(pr){BM={pr,unit:pr.budgetUnit||'Q',y:ui.year,draft:{...(pr.budget||{})}};drawBM();}
+function drawBM(){const{pr,unit,y,draft}=BM,P=periodsOf(unit,y,pr);BM.P=P;
+  const pd=projDayPlan(P[0].from,P[P.length-1].to)[pr.id]||{};BM.plan={};for(const p of P)BM.plan[p.key]=sumDays(pd,p.from,p.to);
+  let h=`<div class="toolbar"><span class="small muted">Budget-Raster</span><div class="seg">${Object.entries(GRAN).map(([k,t])=>`<button data-act="bmUnit" data-v="${k}" class="${unit===k?'on':''}">${t}</button>`).join('')}</div>
+   ${unit!=='T'?`<button class="btn sm" data-act="bmYear" data-v="-1">‹</button><b>${y}</b><button class="btn sm" data-act="bmYear" data-v="1">›</button>`:''}<span class="sp"></span><span class="small">Σ Budget <b id="bmSum"></b> · Σ Plan <b>${fN(P.reduce((t,p)=>t+BM.plan[p.key],0))}</b> PT</span></div>
+  <div class="toolbar small" style="margin-top:-4px"><span class="muted">Schnell:</span><input type="number" id="bmTotal" step="0.5" min="0" style="width:90px" placeholder="PT gesamt"><button class="btn sm" data-act="bmDist" data-v="wd" title="anteilig nach Arbeitstagen innerhalb der Projektlaufzeit">nach Arbeitstagen verteilen</button><button class="btn sm" data-act="bmDist" data-v="eq">gleichmäßig verteilen</button><button class="btn sm" data-act="bmFromPlan" title="Budget = aktueller Plan je Periode">= Plan übernehmen</button><button class="btn sm danger" data-act="bmClear">leeren</button></div>
+  <div style="max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:8px"><table><tr><th>Periode</th><th>Zeitraum</th><th class="n">Arbeitstage</th><th class="n">Plan PT</th><th class="n">Budget PT</th><th class="n">Budget − Plan</th></tr>`;
+  for(const p of P){const inRun=(!pr.end||p.from<=pr.end)&&(!pr.start||p.to>=pr.start),pl=BM.plan[p.key];
+    h+=`<tr style="${inRun?'':'opacity:.4'}" title="${inRun?'':'außerhalb der Projektlaufzeit'}"><td>${p.label}</td><td class="small muted">${fmtDM(p.from)}–${fmtDM(p.to)}</td><td class="n">${fN(wdC(p.from,p.to))}</td><td class="n">${pl?fN(pl):'–'}</td>
+    <td class="n"><input type="number" step="0.25" min="0" data-bk="${p.key}" value="${draft[p.key]??''}" style="width:90px;text-align:right;padding:3px 6px"></td><td class="n" data-bd="${p.key}"></td></tr>`;}
+  h+=`</table></div><p class="help" style="margin:10px 0 0">Beim Wechsel des Rasters werden vorhandene Budgets anteilig nach Arbeitstagen umgerechnet (z. B. Quartal → Monate). Alle Auswertungen (Jahr, Quartal, Monat, Woche) rechnen das Budget automatisch auf den gewählten Zeitraum um.</p>
+  <div class="actions" style="margin-top:12px"><span class="sp"></span><button class="btn" data-close>Abbrechen</button><button class="btn primary" data-act="bmSave">Budget speichern</button></div>`;
+  openModal(`PT-Budget – ${pr.name}`,h);document.querySelector('.mbox').style.width='min(760px,100%)';bmUpd();}
+function bmUpd(){let t=0;for(const p of BM.P){const v=+BM.draft[p.key]||0;t+=v;const c=document.querySelector(`[data-bd="${p.key}"]`);if(c){const d=v-BM.plan[p.key];c.innerHTML=v||BM.plan[p.key]?`<span class="${d<-1e-9?'bad':d>1e-9?'ok':'muted'}">${d>0?'+':''}${fN(d)}</span>`:'';}}
+  const e=document.getElementById('bmSum');if(e)e.textContent=fN(t);}
+document.addEventListener('input',e=>{const k=e.target.dataset?.bk;if(!k||!BM)return;const v=e.target.value;if(v===''||isNaN(+v))delete BM.draft[k];else BM.draft[k]=+v;bmUpd();});
+function bmAct(A,v){const{pr}=BM;
+  if(A==='bmUnit'){if(v===BM.unit)return;BM.draft=convertBudget(BM.draft,v,{...pr,budgetUnit:BM.unit});BM.unit=v;return drawBM();}
+  if(A==='bmYear'){BM.y+=+v;return drawBM();}
+  if(A==='bmClear'){for(const p of BM.P)delete BM.draft[p.key];return drawBM();}
+  if(A==='bmFromPlan'){for(const p of BM.P){const x=BM.plan[p.key];if(x>0)BM.draft[p.key]=r2(x);else delete BM.draft[p.key];}return drawBM();}
+  if(A==='bmDist'){const tot=parseFloat(document.getElementById('bmTotal').value);if(!(tot>0))return toast('Bitte zuerst PT gesamt eingeben');
+    const w=BM.P.map(p=>{const a=maxS(p.from,pr.start||p.from),b=minS(p.to,pr.end||p.to);if(a>b)return 0;return v==='wd'?wdC(a,b):1;});const sw=w.reduce((x,y)=>x+y,0);if(!sw)return toast('Keine Arbeitstage in der Projektlaufzeit');
+    let rest=tot,big=-1;BM.P.forEach((p,i)=>{if(!w[i]){delete BM.draft[p.key];return;}const x=Math.round(tot*w[i]/sw*4)/4;BM.draft[p.key]=x;rest-=x;if(big<0||w[i]>w[big])big=i;});
+    if(big>=0&&Math.abs(rest)>1e-9)BM.draft[BM.P[big].key]=r2(BM.draft[BM.P[big].key]+rest);return drawBM();}
+  if(A==='bmSave'){const out={};for(const[k,x] of Object.entries(BM.draft))if(+x>0)out[k]=+x;pr.budget=out;pr.budgetUnit=BM.unit;BM=null;closeModal();save();render();toast('Budget gespeichert',[['Rückgängig',undo]]);}}
+
+/* ---------- Schnellzugriff (Strg+K) ---------- */
+function palette(){
+  const go=t=>()=>{ui.tab=t;render();};
+  const I=[...NAV.flatMap(([g,it])=>it.map(([k,i,t])=>({i,t:'Öffnen: '+t,g:'Navigation',f:go(k)}))),
+    {i:'＋',t:'Neue Buchung',g:'Aktion',f:()=>bookingForm()},{i:'🌴',t:'Neue Abwesenheit / Urlaub',g:'Aktion',f:()=>absenceForm()},
+    {i:'＋',t:'Neues Projekt',g:'Aktion',f:()=>projectForm()},{i:'＋',t:'Neue Person',g:'Aktion',f:()=>personForm()},
+    {i:'⧉',t:'Woche kopieren / fortschreiben',g:'Aktion',f:()=>copyWeekForm()},{i:'↻',t:'Feste Zuordnung anlegen',g:'Aktion',f:()=>ruleForm()},
+    {i:'ℹ',t:`Über PT-Planer v${APP.version} / GitHub`,g:'Info',f:go('data')},
+    {i:'⬇',t:'Backup exportieren (JSON)',g:'Daten',f:()=>download(`pt-planer-backup-${todayISO}.json`,JSON.stringify({_meta:{app:APP.name,version:APP.version,exported:new Date().toISOString(),repo:APP.repo},...S},null,2),'application/json')},
+    ...S.people.flatMap(p=>[{i:'◔',t:`Restkapazität: ${p.name}`,g:'Person',f:()=>{ui.freePerson=p.id;ui.tab='free';render();}},
+      {i:'▦',t:`Kalender: ${p.name}`,g:'Person',f:()=>{ui.filterPerson=p.id;ui.tab='cal';render();}},{i:'✎',t:`Bearbeiten: ${p.name}`,g:'Person',f:()=>personForm(p)},
+      {i:'🌴',t:`Urlaub eintragen: ${p.name}`,g:'Person',f:()=>absenceForm(null,{personId:p.id})}]),
+    ...S.projects.flatMap(pr=>[{i:'◆',t:`Budget: ${pr.name}`,g:'Projekt',f:()=>budgetModal(pr)},{i:'✎',t:`Bearbeiten: ${pr.name}`,g:'Projekt',f:()=>projectForm(pr)},
+      {i:'▦',t:`Kalender gefiltert: ${pr.name}`,g:'Projekt',f:()=>{ui.filterProject=pr.id;ui.tab='cal';render();}},{i:'＋',t:`Buchen auf: ${pr.name}`,g:'Projekt',f:()=>bookingForm(null,{projectId:pr.id})}])];
+  openModal('Schnellzugriff',`<input id="palIn" autocomplete="off" placeholder="Was möchtest du tun? z. B. „Urlaub“, „Budget“ oder einen Namen" style="width:100%;font-size:16px;padding:10px 12px"><div id="palList" class="pal"></div><p class="help" style="margin:8px 0 0">↑ ↓ auswählen · Enter ausführen · Esc schließen</p>`);
+  const inp=document.getElementById('palIn'),list=document.getElementById('palList');let sel=0,F=[];
+  const draw=()=>{const q=inp.value.toLowerCase().trim().split(/\s+/).filter(Boolean);F=I.filter(x=>q.every(w=>(x.t+' '+x.g).toLowerCase().includes(w))).slice(0,14);if(sel>=F.length)sel=0;
+    list.innerHTML=F.length?F.map((x,i)=>`<div class="pi ${i===sel?'on':''}" data-pi="${i}"><b style="width:20px;text-align:center;font-weight:400">${x.i}</b>${esc(x.t)}<span>${x.g}</span></div>`).join(''):'<div class="empty">Nichts gefunden.</div>';};
+  const run=i=>{const x=F[i];if(!x)return;closeModal();x.f();};
+  inp.oninput=()=>{sel=0;draw();};
+  inp.onkeydown=e=>{if(e.key==='ArrowDown'){sel=Math.min(F.length-1,sel+1);draw();e.preventDefault();}else if(e.key==='ArrowUp'){sel=Math.max(0,sel-1);draw();e.preventDefault();}else if(e.key==='Enter'){e.preventDefault();run(sel);}};
+  list.onclick=e=>{const d=e.target.closest('[data-pi]');if(d)run(+d.dataset.pi);};
+  draw();setTimeout(()=>inp.focus(),0);
+}
+
+/* ====================== Events ====================== */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-close]');if(c){closeModal();return;}
+  if(e.target.id==='modal'){closeModal();return;}
+  const t=e.target.closest('[data-tab]');if(t){ui.tab=t.dataset.tab;render();window.scrollTo(0,0);return;}
+  const gb=e.target.closest('[data-gran]');if(gb){ui.gran=gb.dataset.gran;ui.pv=ui.year===now.getFullYear()?curOf(ui.gran,ui.year):1;syncMonth();render();return;}
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const A=el.dataset.act,id=el.dataset.id;if(el.tagName==='A')e.preventDefault();
+  const rr=()=>{save();render();};
+  switch(A){
+    case 'newProject':return projectForm();
+    case 'dashMore':ui.dashMore=!ui.dashMore;return render();
+    case 'goTab':ui.tab=el.dataset.v;if(el.dataset.p)ui.freePerson=el.dataset.p;return render();
+    case 'budget':return budgetModal(project(id));
+    case 'projGran':ui.projGran=el.dataset.v;return render();
+    case 'bmUnit':case 'bmYear':case 'bmClear':case 'bmFromPlan':case 'bmDist':case 'bmSave':return bmAct(A,el.dataset.v);
+    case 'editProject':return projectForm(project(id));
+    case 'autoFill':return autoFill(el.dataset.p,el.dataset.pr,el.dataset.a,el.dataset.b,+el.dataset.n);
+    case 'rangeBookPr':return bookingForm(null,{personId:el.dataset.p,projectId:el.dataset.pr,date:el.dataset.a,to:el.dataset.b,fill:true});
+    case 'freeWeek':return rangeModal(el.dataset.p,el.dataset.a,el.dataset.b);
+    case 'cleanOut':{const n0=S.allocations.length;S.allocations=S.allocations.filter(a=>!(a.type==='plan'&&+a.amount>0&&project(a.projectId)&&!inRun(project(a.projectId),a.date)));rr();return toast(`${n0-S.allocations.length} Buchung(en) außerhalb der Projektlaufzeit entfernt`,[['Rückgängig',undo]]);}
+    case 'nextPeriod':return stepPeriod(1);
+    case 'showFree':ui.freePerson=id;ui.tab='free';return render();
+    case 'freeBook':return bookingForm(null,{personId:el.dataset.p,date:el.dataset.d,to:el.dataset.to,fill:true});
+    case 'newPerson':return personForm();
+    case 'editPerson':return personForm(person(id));
+    case 'newRule':return ruleForm();
+    case 'editRule':return ruleForm(S.rules.find(r=>r.id===id));
+    case 'newBooking':return bookingForm();
+    case 'editBooking':return bookingForm(S.allocations.find(a=>a.id===id));
+    case 'delBooking':S.allocations=S.allocations.filter(a=>a.id!==id);rr();if(el.dataset.reday){const[p,d]=el.dataset.reday.split('|');dayModal(p,d);}return;
+    case 'newAbsence':return absenceForm();
+    case 'editAbsence':return absenceForm(S.absences.find(a=>a.id===id));
+    case 'approveAbs':{const a=S.absences.find(x=>x.id===id);if(a)a.status='genehmigt';return rr();}
+    case 'newCustom':return customForm();
+    case 'editCustom':return customForm(S.custom.find(c=>c.id===id));
+    case 'calMode':ui.calMode=el.dataset.v;return render();
+    case 'mPrev':ui.month--;if(ui.month<1){ui.month=12;ui.year--;}syncFromMonth();return render();
+    case 'mNext':ui.month++;if(ui.month>12){ui.month=1;ui.year++;}syncFromMonth();return render();
+    case 'mToday':ui.year=now.getFullYear();ui.month=now.getMonth()+1;syncFromMonth();return render();
+    case 'week':{const d=el.dataset.d;ui.month=+d.slice(5,7);ui.calMode='month';return render();}
+    case 'day':if(SUPPRESS){SUPPRESS=false;return;}return dayModal(el.dataset.p,el.dataset.d);
+    case 'paintToggle':ui.paint.on=!ui.paint.on;return render();
+    case 'undo':return undo();
+    case 'redo':return redo();
+    case 'copyWeek':return copyWeekForm(el.dataset.p?{personId:el.dataset.p,date:el.dataset.d}:null);
+    case 'confirmBooking':{const a=S.allocations.find(x=>x.id===id);if(a)a.tentative=false;rr();if(el.dataset.reday){const[p,d]=el.dataset.reday.split('|');dayModal(p,d);}return;}
+    case 'confirmAll':{const[f,t]=curRange();let n=0;for(const a of S.allocations)if(a.tentative&&a.date>=f&&a.date<=t&&(!ui.filterPerson||a.personId===ui.filterPerson)&&(!ui.filterProject||a.projectId===ui.filterProject)){a.tentative=false;n++;}rr();return toast(n+' Buchung(en) bestätigt',[['Rückgängig',undo]]);}
+    case 'rangeBook':closeModal();return bookingForm(null,{personId:el.dataset.p,date:el.dataset.a,to:el.dataset.b,fill:true});
+    case 'rangeAbs':closeModal();return absenceForm(null,{personId:el.dataset.p,date:el.dataset.a,to:el.dataset.b});
+    case 'rangeDo':closeModal();return applyPaint(el.dataset.p,el.dataset.a,el.dataset.b,{what:el.dataset.w,amount:1,fill:true});
+    case 'dayBook':return bookingForm(null,{personId:el.dataset.p,date:el.dataset.d,type:el.dataset.t});
+    case 'dayVac':S.absences.push({id:uid(),personId:el.dataset.p,type:'urlaub',from:el.dataset.d,to:el.dataset.d,halfStart:el.dataset.h==='1',halfEnd:false,status:'genehmigt',note:''});rr();return dayModal(el.dataset.p,el.dataset.d);
+    case 'dayAbs':return absenceForm(null,{personId:el.dataset.p,date:el.dataset.d});
+    case 'ruleSkip':case 'ruleHalf':{const r=S.rules.find(x=>x.id===el.dataset.r);S.allocations.push({id:uid(),personId:el.dataset.p,projectId:r.projectId,date:el.dataset.d,amount:A==='ruleSkip'?0:0.5,type:'plan',note:A==='ruleSkip'?'Ausnahme feste Zuordnung':'feste Zuordnung halbiert'});rr();return dayModal(el.dataset.p,el.dataset.d);}
+    case 'calcRange':{const a=document.getElementById('rcFrom').value,b=document.getElementById('rcTo').value,o=document.getElementById('rcOut');if(!a||!b||b<a){o.textContent='Zeitraum prüfen.';return;}
+      const bl=curHolBL(),sw=stdWorkdays(a,b,bl);let cal=0,we=0;for(const s of days(a,b)){cal++;const w=wday(s);if(!w||w===6)we++;}
+      o.innerHTML=`<b style="font-size:20px">${fN(sw.n)} Arbeitstage</b><br>${cal} Kalendertage · ${we} Wochenendtage · ${fN(sw.h)} Feiertag(e) auf Werktagen · ≙ ${fN(sw.n*(+S.settings.hoursPerDay||8))} h`;return;}
+    case 'exportJSON':return download(`pt-planer-backup-${todayISO}.json`,JSON.stringify({_meta:{app:APP.name,version:APP.version,exported:new Date().toISOString(),repo:APP.repo},...S},null,2),'application/json');
+    case 'importJSON':return document.getElementById('fileImport').click();
+    case 'exportCSV':return exportCSV();
+    case 'exportCSVq':return exportCSVq(el.dataset.v||'Q');
+    case 'exportICS':return exportICS();
+    case 'loadDemo':return setDemo(true,ui.demo);
+    case 'demoOff':return setDemo(false);
+    case 'clearAll':if(confirm('Wirklich ALLE Daten löschen? (Vorher Export empfohlen)')){S=migrate({settings:S.settings});rr();}return;
+  }
+});
+document.addEventListener('change',e=>{
+  const k=e.target.dataset.chg;if(k){ui[k]=e.target.value;render();return;}
+  const pk=e.target.dataset.paint;if(pk){ui.paint[pk]=e.target.type==='checkbox'?e.target.checked:e.target.value;render();return;}
+  if(e.target.id==='selYear'){ui.year=+e.target.value;render();}
+  if(e.target.id==='selGran'){ui.gran=e.target.value;ui.pv=ui.year===now.getFullYear()?curOf(ui.gran,ui.year):1;syncMonth();render();}
+  if(e.target.id==='selPv'){ui.pv=+e.target.value;syncMonth();render();}
+});
+document.addEventListener('submit',e=>{if(e.target.id!=='setForm')return;e.preventDefault();const f=e.target.elements;
+  Object.assign(S.settings,{teamName:f.teamName.value,bl:f.bl.value,hoursPerDay:parseFloat(f.hoursPerDay.value)||8,absReduces:f.absReduces.value,halfXmas:f.halfXmas.checked,halfNye:f.halfNye.checked});save();render();});
+document.addEventListener('keydown',e=>{
+  const modalOpen=!document.getElementById('modal').classList.contains('hidden'),inField=/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||'');
+  if(e.key==='Escape'){if(modalOpen)closeModal();else if(ui.paint.on){ui.paint.on=false;render();}return;}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();return palette();}
+  if(inField)return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();return e.shiftKey?redo():undo();}
+  if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();return redo();}
+  if(modalOpen||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(ui.tab==='cal'&&ui.calMode==='month'){if(e.key==='ArrowLeft')document.querySelector('[data-act=mPrev]')?.click();if(e.key==='ArrowRight')document.querySelector('[data-act=mNext]')?.click();if(k==='p'){ui.paint.on=!ui.paint.on;render();}}
+});
+/* Ziehen & Malen im Monatskalender */
+let DRAG=null,SUPPRESS=false;
+function markSel(){const a=minS(DRAG.a,DRAG.b),b=maxS(DRAG.a,DRAG.b);document.querySelectorAll('.cal td.c').forEach(td=>td.classList.toggle('sel',td.dataset.p===DRAG.p&&td.dataset.d>=a&&td.dataset.d<=b));}
+document.addEventListener('mousedown',e=>{if(e.button!==0)return;const td=e.target.closest('.cal td.c[data-act=day]');if(!td)return;e.preventDefault();DRAG={p:td.dataset.p,a:td.dataset.d,b:td.dataset.d,moved:false};markSel();});
+document.addEventListener('mouseover',e=>{if(!DRAG)return;const td=e.target.closest('.cal td.c[data-act=day]');if(!td||td.dataset.p!==DRAG.p||td.dataset.d===DRAG.b)return;DRAG.b=td.dataset.d;DRAG.moved=true;markSel();});
+document.addEventListener('mouseup',()=>{if(!DRAG)return;const d=DRAG;DRAG=null;const a=minS(d.a,d.b),b=maxS(d.a,d.b);
+  if(ui.paint.on||d.moved){SUPPRESS=true;setTimeout(()=>{SUPPRESS=false;},0);}
+  document.querySelectorAll('.cal td.c.sel').forEach(td=>td.classList.remove('sel'));
+  if(ui.paint.on)applyPaint(d.p,a,b,ui.paint);else if(d.moved)rangeModal(d.p,a,b);});
+function rangeModal(pid,a,b){const p=person(pid);let wd=0,fr=0;for(const s of days(a,b)){const d=dayInfo(p,s);if(d.avail>0)wd++;fr+=Math.max(0,d.avail-d.planSum);}
+  const at=`data-p="${pid}" data-a="${a}" data-b="${b}"`;
+  openModal('Zeitraum bearbeiten',`<p style="margin-top:0"><b>${esc(p.name)}</b> · ${WD[wday(a)]} ${fmtDE(a)} – ${WD[wday(b)]} ${fmtDE(b)}<br><span class="muted">${wd} verfügbare Arbeitstag(e) · davon noch frei: <b>${fN(fr)} PT</b></span></p>
+  <div class="toolbar"><button class="btn primary" data-act="rangeBook" ${at}>Projekt buchen …</button><button class="btn" data-act="rangeDo" data-w="a:urlaub" ${at}>🌴 Urlaub eintragen</button><button class="btn" data-act="rangeAbs" ${at}>Abwesenheit …</button><button class="btn danger" data-act="rangeDo" data-w="x" ${at}>✕ Tage leeren</button></div>`);}
+function applyPaint(pid,a,b,P){const p=person(pid);let n=0,msg='';
+  if(P.what.startsWith('p:')){const prj=P.what.slice(2);
+    const prO=project(prj);let out=0;for(const s of days(a,b)){if(!inRun(prO,s)){out++;continue;}const d=dayInfo(p,s);if(d.avail<=0)continue;let amt=+P.amount||1;
+      if(P.fill){const free=d.avail-d.plan.filter(x=>x.pid!==prj).reduce((t,x)=>t+x.amt,0);amt=Math.min(amt,Math.floor(Math.max(0,free)*100+1e-6)/100);if(amt<=0)continue;}
+      S.allocations=S.allocations.filter(x=>!(x.personId===pid&&x.projectId===prj&&x.date===s&&x.type!=='ist'));
+      S.allocations.push({id:uid(),personId:pid,projectId:prj,date:s,amount:amt,type:'plan',tentative:!!P.tent,note:''});n++;}
+    msg=(n?`${n} Tag(e) für ${prO?.name} gebucht`:out?`„${prO?.name}“ läuft in diesem Bereich nicht (${runTxt(prO)})`:'Keine freie Kapazität im markierten Bereich')+(n&&out?` · ${out} Tag(e) außerhalb der Laufzeit übersprungen`:'');
+  }else if(P.what.startsWith('a:')){const[,type,h]=P.what.split(':');const work=s=>{const d=dayInfo(p,s);return d.base*(1-d.hf)>0;};
+    S.absences=S.absences.filter(x=>!(x.personId===pid&&x.from>=a&&x.to<=b));
+    if(h){for(const s of days(a,b))if(work(s)){S.absences.push({id:uid(),personId:pid,type,from:s,to:s,halfStart:true,halfEnd:false,status:'genehmigt',note:''});n++;}}
+    else{let x=a,y=b;while(x<=y&&!work(x))x=addDays(x,1);while(y>=x&&!work(y))y=addDays(y,-1);
+      if(x<=y){S.absences.push({id:uid(),personId:pid,type,from:x,to:y,halfStart:false,halfEnd:false,status:'genehmigt',note:''});for(const s of days(x,y))if(work(s))n++;}}
+    msg=n?`${ABS[type]?.t}: ${n} Arbeitstag(e) eingetragen${h?' (je ½)':''}`:'Keine Arbeitstage im markierten Bereich';
+  }else{const b1=S.allocations.length,b2=S.absences.length;
+    S.allocations=S.allocations.filter(x=>!(x.personId===pid&&x.date>=a&&x.date<=b&&x.type!=='ist'));
+    S.absences=S.absences.filter(x=>!(x.personId===pid&&x.from>=a&&x.to<=b));
+    let ex=0;for(const s of days(a,b))for(const r of IDX.rules[pid]||[]){if(s<r.from||s>r.to||!(r.weekdays||[]).includes(wday(s)))continue;S.allocations.push({id:uid(),personId:pid,projectId:r.projectId,date:s,amount:0,type:'plan',note:'Ausnahme (geleert)'});ex++;}
+    msg=`Geleert: ${b1-S.allocations.length+ex} Buchung(en), ${b2-S.absences.length} Abwesenheit(en)${ex?`, ${ex} feste Tage ausgesetzt`:''}`;}
+  save();render();toast(msg,[['Rückgängig',undo]]);}
+function copyWeekForm(pre){
+  if(!S.people.length)return;const src0=pre?.date||todayISO;
+  formModal({title:'Woche kopieren / fortschreiben',values:{personId:pre?.personId||ui.filterPerson||S.people[0].id,projectId:ui.filterProject||'',src:src0,until:addDays(monday(src0),34),fill:true,tent:false},fields:[
+    {type:'html',html:'<p class="help" style="margin:0">Übernimmt die Einzelbuchungen (Plan) einer Woche in jede folgende Woche bis zum Enddatum – gleiche Wochentage, gleicher Umfang. Feiertage und Urlaub werden übersprungen. Feste Zuordnungen wiederholen sich ohnehin.</p>'},
+    {key:'personId',label:'Person',type:'select',options:optPeople()},{key:'projectId',label:'Projekt',type:'select',options:[{v:'',t:'alle Projekte der Woche'},...optProjects()]},
+    {key:'src',label:'Quellwoche (beliebiger Tag darin)',type:'date',req:1},{key:'until',label:'Fortschreiben bis',type:'date',req:1},
+    {key:'fill',label:'Nur freie Kapazität (keine Überbuchung)',type:'checkbox'},{key:'tent',label:'Kopien als vorläufig markieren',type:'checkbox'}],
+    onSave:o=>{const m=monday(o.src),me=addDays(m,6),p=person(o.personId);
+      const src=S.allocations.filter(a=>a.personId===o.personId&&a.type!=='ist'&&+a.amount>0&&a.date>=m&&a.date<=me&&(!o.projectId||a.projectId===o.projectId));
+      if(!src.length)return `In KW ${isoWeek(m)} gibt es für diese Auswahl keine Einzelbuchungen.`;
+      if(!o.until||o.until<=me)return 'Das Enddatum muss nach der Quellwoche liegen.';
+      let n=0;for(let w=addDays(m,7);w<=o.until;w=addDays(w,7))for(const a of src){const s=addDays(w,Math.round((toD(a.date)-toD(m))/864e5));if(s>o.until)continue;
+        if(!inRun(project(a.projectId),s))continue;buildIdx();const d=dayInfo(p,s);if(d.avail<=0)continue;let amt=+a.amount;
+        if(o.fill){const free=d.avail-d.plan.filter(x=>x.pid!==a.projectId).reduce((t,x)=>t+x.amt,0);amt=Math.min(amt,Math.floor(Math.max(0,free)*100+1e-6)/100);if(amt<=0)continue;}
+        S.allocations=S.allocations.filter(x=>!(x.personId===a.personId&&x.projectId===a.projectId&&x.date===s&&x.type!=='ist'));
+        S.allocations.push({id:uid(),personId:a.personId,projectId:a.projectId,date:s,amount:amt,type:'plan',tentative:o.tent||!!a.tentative,note:a.note||''});n++;}
+      toast(`${n} Buchung(en) aus KW ${isoWeek(m)} kopiert`,[['Rückgängig',undo]]);}});
+}
+document.getElementById('fileImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.people||!d.projects)throw new Error('Keine PT-Planer-Datei');S=migrate(d);save();render();alert('Import erfolgreich.');}catch(err){alert('Import fehlgeschlagen: '+err.message);}e.target.value='';};r.readAsText(f);});
+document.getElementById('btnTheme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem(KEY+'.theme',r.dataset.theme);}catch(e){}};
+(()=>{let t=null;try{t=localStorage.getItem(KEY+'.theme');}catch(e){}document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');})();
+
+/* ====================== Demo ====================== */
+function demo(){
+  const y=new Date().getFullYear(),I=(m,d)=>iso(y,m,d);
+  const P=[{id:'p1',name:'Anna Schmidt',role:'Projektleitung',color:'#2f6fde',bl:'',workdays:[1,2,3,4,5],fte:1,vacation:30,carry:{[y]:4}},
+    {id:'p2',name:'Ben Yilmaz',role:'Entwicklung (4-Tage-Woche)',color:'#e4572e',bl:'',workdays:[1,2,3,4],fte:1,vacation:24,carry:{}},
+    {id:'p3',name:'Clara Weber',role:'Pentest (80 %, remote Köln)',color:'#17a589',bl:'NW',workdays:[1,2,3,4,5],fte:0.8,vacation:30,carry:{[y]:2}},
+    {id:'p4',name:'Deniz Kaya',role:'Werkstudent',color:'#f2a541',bl:'',workdays:[2,4],fte:1,vacation:10,carry:{}}];
+  const PR=[{id:'a',name:'Pentest Kunde Alpha',code:'ALPHA',client:'Alpha GmbH',color:'#e4572e',status:'aktiv',start:I(1,12),end:I(6,30),dayRate:1200,budget:{[y+'-Q1']:30,[y+'-Q2']:36},milestones:[{date:I(3,20),name:'Zwischenbericht'},{date:I(6,26),name:'Abschlussbericht'}]},
+    {id:'w',name:'Webportal Relaunch',code:'WEB',client:'intern',color:'#2f6fde',status:'aktiv',start:I(2,2),end:I(12,18),dayRate:950,budget:{[y+'-Q1']:50,[y+'-Q2']:72,[y+'-Q3']:80,[y+'-Q4']:60},milestones:[{date:I(5,15),name:'Beta Go-Live'},{date:I(11,27),name:'Go-Live'}]},
+    {id:'b',name:'Security Audit Beta',code:'BETA',client:'Beta AG',color:'#17a589',status:'aktiv',start:I(7,1),end:I(10,30),dayRate:1100,budget:{[y+'-Q3']:36,[y+'-Q4']:14},milestones:[{date:I(10,23),name:'Audit-Report'}]},
+    {id:'i',name:'Intern / Weiterbildung',code:'INT',client:'',color:'#8e6cd9',status:'aktiv',start:I(1,1),end:I(12,31),dayRate:0,budget:{[y+'-Q1']:12,[y+'-Q2']:12,[y+'-Q3']:12,[y+'-Q4']:12},milestones:[]},
+    {id:'c',name:'Angebot Gamma (Akquise)',code:'GAMMA',client:'Gamma KG',color:'#d64593',status:'geplant',start:I(11,16),end:I(12,31),dayRate:1150,budget:{[y+'-Q4']:8},milestones:[{date:I(12,4),name:'Angebotsabgabe'}]}];
+  const R=[{id:'r1',personId:'p1',projectId:'w',weekdays:[1,3],amount:0.5,from:I(2,2),to:I(12,18),note:'PL-Anteil Web'},
+    {id:'r2',personId:'p1',projectId:'i',weekdays:[5],amount:0.5,from:I(1,1),to:I(12,31),note:'Jour fixe / Weiterbildung'},
+    {id:'r3',personId:'p2',projectId:'w',weekdays:[1,2,3,4],amount:1,from:I(2,2),to:I(12,18),note:''},
+    {id:'r4',personId:'p3',projectId:'a',weekdays:[2,3,4],amount:1,from:I(1,12),to:I(6,30),note:'Pentest-Tage fix'},
+    {id:'r5',personId:'p3',projectId:'b',weekdays:[2,3,4],amount:1,from:I(7,1),to:I(10,30),note:''},
+    {id:'r6',personId:'p3',projectId:'i',weekdays:[1],amount:0.5,from:I(1,1),to:I(12,31),note:'Research-Montag'},
+    {id:'r7',personId:'p4',projectId:'w',weekdays:[2,4],amount:0.5,from:I(3,1),to:I(12,18),note:'Frontend-Support'}];
+  const AL=[];const add=(p,pr,d,amt,type='plan',note='')=>AL.push({id:uid(),personId:p,projectId:pr,date:d,amount:amt,type,note});
+  for(const m of [1,2,3,4,5,6])add('p1','a',I(m,9+(m%3)),1,'plan','Kickoff/Abstimmung');
+  for(const m of [7,8,9,10])add('p1','b',I(m,14),1,'plan','Abstimmung Kunde');
+  for(const m of [11,12]){add('p1','c',I(m,17),1);add('p1','c',I(m,18),0.5);}
+  add('p3','i',I(Math.min(12,now.getMonth()+1),5),1,'plan','doppelt gebucht (Demo)');
+  for(const s of days(I(Math.max(1,now.getMonth()),1),addDays(todayISO,-1))){const w=wday(s);if(w>=1&&w<=4)add('p2','w',s,w===4?0.75:1,'ist');}
+  const AB=[{id:'v1',personId:'p1',type:'urlaub',from:I(8,3),to:I(8,14),halfStart:false,halfEnd:false,status:'genehmigt',note:'Sommer'},
+    {id:'v2',personId:'p1',type:'urlaub',from:I(12,21),to:I(12,31),halfStart:false,halfEnd:false,status:'beantragt',note:''},
+    {id:'v3',personId:'p2',type:'urlaub',from:I(5,26),to:I(5,29),halfStart:false,halfEnd:true,status:'genehmigt',note:''},
+    {id:'v4',personId:'p2',type:'urlaub',from:I(11,12),to:I(11,12),halfStart:true,halfEnd:false,status:'genehmigt',note:'halber Tag'},
+    {id:'v5',personId:'p3',type:'krank',from:I(3,2),to:I(3,4),halfStart:false,halfEnd:false,status:'genehmigt',note:''},
+    {id:'v6',personId:'p3',type:'schulung',from:I(9,15),to:I(9,16),halfStart:false,halfEnd:false,status:'genehmigt',note:'Konferenz'},
+    {id:'v7',personId:'p3',type:'urlaub',from:I(7,20),to:I(8,7),halfStart:false,halfEnd:false,status:'genehmigt',note:''},
+    {id:'v8',personId:'p4',type:'urlaub',from:I(12,1),to:I(12,10),halfStart:false,halfEnd:false,status:'beantragt',note:'Prüfungsphase'}];
+  return migrate({settings:{...defaultSettings(),bl:''},people:P,projects:PR,rules:R,allocations:AL,absences:AB,custom:[{id:'c1',name:'Betriebsausflug',from:I(6,19),to:I(6,19),factor:0.5,bl:''}]});
+}
+
+render();
+</script>
+</body>
+</html>
